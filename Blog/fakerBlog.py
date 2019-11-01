@@ -1,10 +1,10 @@
 # coding: utf-8
 from faker import Faker
-from BlogSchema import User, Article, Category , Tag
-from BlogSchema import engine
+from Blog.BlogSchema import User, Article
+from Blog.BlogSchema import engine
 from sqlalchemy.orm import sessionmaker
 faker = Faker(locale='zh_CN')
-import  random
+
 
 def fakerUser(session,num=10):
     faker_users = [User(
