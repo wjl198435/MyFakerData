@@ -15,6 +15,7 @@ class User(Base):
 
     id = Column(Integer, primary_key=True)
     username = Column(String(64), nullable=False, index=True)
+    friendly_name = Column(String(64))
     password = Column(String(64), nullable=False)
     tel = Column(String(11), nullable=False, index=True)
     email = Column(String(64), nullable=False, index=True)
@@ -33,6 +34,7 @@ class UserInfo(Base):
 
     id = Column(Integer, primary_key=True)
     name = Column(String(64), nullable=False, index=True)
+    friendly_name = Column(String(64))
     weixin_id = Column(String(30))  # 微信号
     sex = Column(String(2))  # 性别
     id_card = Column(String(18))  # 身份证号
@@ -61,6 +63,7 @@ class Poultry(Base):
 
     id = Column(Integer, primary_key=True)
     sn = Column(String(18), nullable=False, index=True)  # 身份序列号
+    friendly_name = Column(String(64))
     sex = Column(String(2))
     weight = Column(FLOAT)
     temperature = Column(FLOAT)
@@ -79,6 +82,7 @@ class PoultryInfo(Base):
     __tablename__ = 'poultryinfos'
 
     id = Column(Integer, primary_key=True)
+    friendly_name = Column(String(64))
     address = Column(String(64))  # 所属单元(那栋楼、那单元)
     sick_times = Column(Integer)  # 生病次数
     total_sick_days = Column(Integer)  # 生病总天数
@@ -94,6 +98,9 @@ class PoultryInfo(Base):
     day_feed_seconds = Column(Integer)  # 当天进食时长
     day_cough_times = Column(Integer)  # 当天咳嗽、喷嚏次数
 
+    lat = Column(FLOAT)  # 经纬度
+    long = Column(FLOAT)  # 经纬度
+
     health_rate = Column(Integer)  # 健康等级
     keeper = Column(String(10))     # 管理饲养员
     camera = Column(Integer, ForeignKey('cameras.id'))  # 监控摄像头设备号
@@ -105,6 +112,7 @@ class State(Base):
 
     id = Column(Integer, primary_key=True)
     state = Column(String(6), nullable=False, index=True)
+    friendly_name = Column(String(64))
     poultryInfo = relationship('PoultryInfo', backref='state')
     def __repr__(self):
         return '%s(%r)' % (self.__class__.__name__, self.state)
@@ -115,6 +123,7 @@ class Health(Base):
 
     id = Column(Integer, primary_key=True)
     health = Column(String(6), nullable=False)
+    friendly_name = Column(String(64))
     poultryInfo = relationship('PoultryInfo', backref='health')
 
     def __repr__(self):
@@ -128,6 +137,7 @@ class Role(Base):
     id = Column(Integer, primary_key=True)
     role = Column(String(64), nullable=False, index=True)
     userinfo = relationship('UserInfo', backref='role')
+    friendly_name = Column(String(64))
 
     def __repr__(self):
         return '%s(%r)' % (self.__class__.__name__, self.role)
@@ -138,6 +148,7 @@ class Category(Base):
 
     id = Column(Integer, primary_key=True)
     name = Column(String(64), nullable=False, index=True)
+    friendly_name = Column(String(64))
     userinfo = relationship('UserInfo', backref='category')
     articles = relationship('Article', backref='category')
 
@@ -158,7 +169,7 @@ class Tag(Base):
 
     id = Column(Integer, primary_key=True)
     name = Column(String(64), nullable=False, index=True)
-
+    friendly_name = Column(String(64))
     def __repr__(self):
         return '%s(%r)' % (self.__class__.__name__, self.name)
 
@@ -167,7 +178,8 @@ class Sensor(Base):
 
     __tablename__ = 'sensors'
     sn = Column(String(18), nullable=False, index=True)  # 序列号
-    sensorcategories = Column(Integer, ForeignKey('sensorcategories.id'))
+    friendly_name = Column(String(64))
+
     model = Column(String(20))  # 产品型号
     mac = Column(String(17))
     id = Column(Integer, primary_key=True)
@@ -177,6 +189,9 @@ class Sensor(Base):
     power = Column(FLOAT)  # 功耗
     manufacturers = Column(String(18))
     manufactures_tel = Column(String(11))
+    lat = Column(FLOAT)  # 经纬度
+    long = Column(FLOAT)  # 经纬度
+    sensorcategories = Column(Integer, ForeignKey('sensorcategories.id'))
     def __repr__(self):
         return '%s(%r)' % (self.__class__.__name__, self.model)
 
@@ -199,12 +214,15 @@ class Switch(Base):
     id = Column(Integer, primary_key=True)
     sn = Column(String(18), nullable=False, index=True)  # 序列号
     model = Column(String(20))  # 产品型号
+    friendly_name = Column(String(64))
     mac = Column(String(17))
     location = Column(String(20))  # 安装位置
-    state = Column(Integer, ForeignKey('switchinfos.id'))   #
+    state = Column(Integer)  #
     power = Column(FLOAT)  # 功耗
     manufacturers = Column(String(18))
     manufactures_tel = Column(String(11))
+    lat = Column(FLOAT)  # 经纬度
+    long = Column(FLOAT)  # 经纬度
     def __repr__(self):
         return '%s(%r)' % (self.__class__.__name__, self.model)
 
@@ -224,19 +242,41 @@ class Camera(Base):
     __tablename__ = 'cameras'
     id = Column(Integer, primary_key=True)
     model = Column(String(20))  # 产品型号
+    friendly_name = Column(String(64))
     link = Column(String(256), nullable=False, index=True)  # 视频播放地址
     location = Column(String(20))  # 安装位置
     sn = Column(String(18), nullable=False, index=True)  # 序列号
+    state = Column(Integer)
     poultries= relationship('Poultry', backref='detect_dev')  # 监控那些家禽
     mac = Column(String(17))  # mac_address
     link = Column(String(128))  #视频播放地址
     power = Column(FLOAT)  # 功耗
+    lat = Column(FLOAT)  # 经纬度
+    long = Column(FLOAT)  # 经纬度
     manufacturers = Column(String(18))
     manufactures_tel = Column(String(11))
+    capacities = relationship('Tag', secondary='camera_capacity', backref='capacities')
     def __repr__(self):
         return '%s(%r)' % (self.__class__.__name__, self.model)
 
 
+class Capacity(Base):
+
+    __tablename__ = 'capacities'
+
+    id = Column(Integer, primary_key=True)
+    name = Column(String(64), nullable=False, index=True)
+    friendly_name = Column(String(64))
+
+    def __repr__(self):
+        return '%s(%r)' % (self.__class__.__name__, self.name)
+
+
+camera_capacity = Table(
+    'camera_capacity', Base.metadata,
+    Column('cameras_id', Integer, ForeignKey('cameras.id')),
+    Column('capacities_id', Integer, ForeignKey('capacities.id'))
+)
 
 if __name__ == '__main__':
     Base.metadata.create_all(engine)
