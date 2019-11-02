@@ -112,6 +112,8 @@ class Company(Base):
     name = Column(String(64))  # 公司名
     address = Column(String(64))  # 地址
     contact = Column(String(11))  # 联系电话
+    scopes_id = Column(Integer, ForeignKey('companies.id'))
+    scopes = relationship('Scope', secondary='company_scope', backref='companies')
 
 
     # scope = relationship('Scope', secondary='company_scope', backref='scopes')
@@ -123,7 +125,21 @@ class Company(Base):
                   self.lat,self.lon,self.link,self.license_id,self.province,self.city,self.street_address,self.company,self.address,self.contact)
 
 
+company_scope = Table('company_scope', Base.metadata,
+                      Column('company_id', Integer, ForeignKey('companies.id')),
+                      Column('scope_id', Integer, ForeignKey('scopes.id'))
+                     )
 
+Scopes = ['母猪','种猪','育肥猪','猪苗']
+
+class Scope(Base):
+
+    __tablename__ = 'scopes'
+
+    id = Column(Integer, primary_key=True)
+    name = Column(String(10), nullable=False, index=True)
+    def __repr__(self):
+        return '%s(%r)' % (self.__class__.__name__, self.name)
 
 # class Article(Base):
 #
@@ -176,11 +192,17 @@ if __name__ == '__main__':
     session = Session()
     sum = 10
 
+    faker_scopes= [Scope(name=Scopes[i]) for i in range(len(Scopes))]
 
     companies = [Company(
-        corporate = "法人",
+        corporate =faker.name(),
         name=faker.company(),
+
     ) for i in range(sum)]
+
+    for i in range(sum):
+        for scope in random.sample(faker_scopes, random.randint(1, 2)):
+            companies[i].scopes.append(scope)
 
     session.add_all(companies)
 
@@ -199,7 +221,12 @@ if __name__ == '__main__':
     ) for i in range(sum)]
 
 
-    faker_roles= [Role(name=random.choice(Roles)) for i in range(len(Roles))]
+    faker_roles= [Role(name=Roles[i]) for i in range(len(Roles))]
+
+
+    # for i in range(len(Roles)):
+    #     faker_role = Role(name = Roles[i])
+
     # print(faker_roles)
     # faker_tags= [Tag(name=faker.word()) for i in range(20)]
 
