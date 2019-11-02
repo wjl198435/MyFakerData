@@ -3,6 +3,11 @@ from faker import Faker
 import json
 import random
 from IOTSchema import User, UserInfo
+from IOTSchema import Company
+from IOTSchema import Roles,Role
+from IOTSchema import engine
+from sqlalchemy.orm import sessionmaker
+
 faker = Faker(locale='zh_CN')
 female = ['男','女']
 
@@ -85,40 +90,53 @@ def fakerUserInfo(num=10):
 
 if __name__ == '__main__':
     # users = fakerUser(10)
+    Session = sessionmaker(bind=engine)
+    session = Session()
 
     number = 10
 
+
     faker_users = [User(
-        username=faker.user_name(),
-        password=faker.md5(),
-        tel=faker.phone_number(),
-        email=faker.email(),
-        join_datetime=faker.past_datetime(),
+        # username=faker.user_name(),
+        # password=faker.md5(),
+        # tel=faker.phone_number(),
+        # email=faker.email(),
+        # join_datetime=faker.past_datetime(),
     ) for i in range(number)]
 
-    UserInfos = [UserInfo(
-        friendly_name = faker.name(),
-        sex = random.choice(female),
-        id_card = faker.credit_card_number(),
-        qq = faker.random_number(digits=random.randint(4, 10)),
-        address = faker.street_address(),
-        lat = faker.latitude(),
-        lon = faker.longitude(),
-        province = faker.province(),
-        # scale = faker.random_number(digits=random.randint(2,5))*100,
-        # total_scale =  faker.random_number(digits=random.randint(4,5))*100,
-        # social_credit_issue = faker.credit_card_number(),
-        # credit_rate = faker.random_digit(),
-        # link = faker.url(),
-        # license_id = faker.random_number(10),
-        # province = faker.province(),
-        # company = faker.company(),
-        user_id = random.choice(faker_users),
+    session.add_all(faker_users)
 
-    ) for i in range(number)]
+    faker_Roles = [Role(name=Roles[i]) for i in range(len(Roles))]
 
-    # print(random.choice(fakerUser(10)))
+    session.add_all(faker_Roles)
 
-    # print(str(random.choice(users)))
-    # print(str(fakerUserInfo(users)))
-    print(UserInfos)
+    for i in range(10):
+        usesinfo = UserInfo(
+                # friendly_name = faker.name(),
+                # sex = random.choice(female),
+                # id_card = faker.credit_card_number(),
+                # qq = faker.random_number(digits=random.randint(4, 10)),
+                # address = faker.street_address(),
+                # lat = faker.latitude(),
+                # lon = faker.longitude(),
+                # province = faker.province(),
+                # scale = faker.random_number(digits=random.randint(2,5))*100,
+                # total_scale =  faker.random_number(digits=random.randint(4,5))*100,
+                # social_credit_issue = faker.credit_card_number(),
+                # credit_rate = faker.random_digit(),
+                # link = faker.url(),
+                # license_id = faker.random_number(10),
+
+                # company = faker.company(),
+                user_id = random.choice(faker_users),
+            )
+
+        # for role in random.sample(faker_Roles, random.randint(1, 2)):
+        #     usesinfo.roles.append(role)
+
+        session.add(usesinfo)
+    #
+    #     print(usesinfo)
+
+
+    session.commit()

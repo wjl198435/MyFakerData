@@ -12,66 +12,79 @@ class User(Base):
 
     __tablename__ = 'users'
 
-    id = Column(Integer, primary_key=True)
-    username = Column(String(64), nullable=False, index=True)
-    password = Column(String(64), nullable=False)
-    tel = Column(String(11), nullable=False, index=True)
-    email = Column(String(64), nullable=False, index=True)
-    join_datetime = Column(DateTime,nullable=False)
+    # id = Column(Integer, primary_key=True)
+    # username = Column(String(64), nullable=False, index=True)
+    # password = Column(String(64), nullable=False)
+    # tel = Column(String(11), nullable=False, index=True)
+    # email = Column(String(64), nullable=False, index=True)
+    # join_datetime = Column(DateTime,nullable=False)
     # articles = relationship('Article', backref='author')
-
     userinfo = relationship('UserInfo', backref='user', uselist=False)
-    roles = relationship('Role', secondary='user_role', backref='user')
+    # userinfo = relationship('UserInfo', backref='user', uselist=False)
+    # roles = relationship('Role', secondary='user_role', backref='users')
+    # tags = relationship('Tag', secondary='user_tag', backref='users')
 
-    company = Column(Integer, ForeignKey('companies.id'))
+    # company = Column(Integer, ForeignKey('companies.id'))
     # userrole = relationship('Role', backref='role')
 
-    def __repr__(self):
-        return '%s(%r,%s,%s,%s,%s)' % (self.__class__.__name__, self.username,self.password,self.tel,self.email,self.join_datetime)
-
-
+    # def __repr__(self):
+    #     return '%s(%r,%s,%s,%s,%s)' % (self.__class__.__name__, self.username,self.password,self.tel,self.email,self.join_datetime)
 
 class UserInfo(Base):
 
     __tablename__ = 'userinfos'
 
     id = Column(Integer, primary_key=True)
-    friendly_name = Column(String(64),nullable=False, index=True)
-    sex = Column(String(2))  # 性别
-    id_card = Column(String(18))  # 身份证号
+    name = Column(String(64))
     qq = Column(String(11))
-    address = Column(String(64))  # 地址
-    lat = Column(FLOAT)  # 经纬度
-    lon = Column(FLOAT)  # 经纬度
-    province = Column(String(10))
-    # role = Column(Integer, ForeignKey('roles.id'))  # 角色
-    # cate_id = Column(Integer, ForeignKey('categories.id')) ## 主营类别
+    phone = Column(String(11))
+    link = Column(String(64))
     user_id = Column(Integer, ForeignKey('users.id'))
 
+# class UserInfo(Base):
+#
+#     __tablename__ = 'userinfos'
+#
+#     id = Column(Integer, primary_key=True)
+#     friendly_name = Column(String(64),nullable=False, index=True)
+#     sex = Column(String(2))  # 性别
+#     id_card = Column(String(24))  # 身份证号
+#     user_id = Column(Integer, ForeignKey('users.id'))
+    # qq = Column(String(11))
+    # address = Column(String(64))  # 地址
+    # lat = Column(FLOAT)  # 经纬度
+    # lon = Column(FLOAT)  # 经纬度
+    # province = Column(String(10))
+    # # role = Column(Integer, ForeignKey('roles.id'))  # 角色
+    # # cate_id = Column(Integer, ForeignKey('categories.id')) ## 主营类别
+    # user_id = Column(Integer, ForeignKey('users.id'))
+    #
+    # roles = relationship('Role', secondary='userinfo_role', backref='userinfos')
 
 
-    def __repr__(self):
-        return '%s(%r,%s,%s,%s,%s,%s,%s,%s,%s)' \
-               % (self.__class__.__name__, self.friendly_name,self.sex,self.id_card,self.qq,self.province,
-                  self.address,self.lat,self.lon,self.user_id)
+
+    # def __repr__(self):
+    #     return '%s(%r,%s,%s,%s,%s,%s,%s,%s,%s)' \
+    #            % (self.__class__.__name__, self.friendly_name,self.sex,self.id_card,self.qq,self.province,
+    #               self.address,self.lat,self.lon,self.user_id)
 
 user_role = Table(
-    'user_role', Base.metadata,
-    Column('users_id', Integer, ForeignKey('users.id')),
+    'userinfo_role', Base.metadata,
+    Column('userinfos_id', Integer, ForeignKey('userinfos.id')),
     Column('role_id', Integer, ForeignKey('roles.id'))
 )
 
 ## 用户角色
+Roles = ["法人","总经理","经理","主管","组长","工人"]
 class Role(Base):
 
     __tablename__ = 'roles'
 
     id = Column(Integer, primary_key=True)
     name = Column(String(10), nullable=False, index=True)
+    friendly_name = Column(String(10))
     def __repr__(self):
-        return '%s(%r)' % (self.__class__.__name__, self.name)
-
-
+        return '%s(%r,%s)' % (self.__class__.__name__, self.name,self.friendly_name)
 
 
 
@@ -98,7 +111,7 @@ class Company(Base):
     address = Column(String(64))  # 地址
     contact = Column(String(11))  # 联系电话
     scope = relationship('Scope', secondary='company_scope', backref='scopes')
-    work = relationship('User', backref='work')
+    # work = relationship('User', backref='work')
 
     def __repr__(self):
         return '%s(%r,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)' \
