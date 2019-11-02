@@ -88,6 +88,8 @@ class Tag(Base):
 
 if __name__ == '__main__':
     Base.metadata.create_all(engine)
+
+
     Session = sessionmaker(bind=engine)
     session = Session()
 
@@ -96,30 +98,30 @@ if __name__ == '__main__':
         password=faker.word(),
         email=faker.email(),
     ) for i in range(10)]
-
     session.add_all(faker_users)
 
-    faker_userinfo = [UserInfo(
-        username=faker.name(),
-        user_id = i
-    ) for i in range(10)]
-    session.add_all(faker_userinfo)
+    for i in range(10):
+        userinfos = UserInfo(
+            name = faker.name(),
+            user_id = random.choice(faker_users)
+        )
+        # userinfos.user_id
 
-    # faker_categories = [Category(name=faker.word()) for i in range(5)]
-    # session.add_all(faker_categories)
-    #
-    # faker_tags= [Tag(name=faker.word()) for i in range(20)]
-    # session.add_all(faker_tags)
-    #
-    # for i in range(100):
-    #     article = Article(
-    #         title=faker.sentence(),
-    #         content=' '.join(faker.sentences(nb=random.randint(10, 20))),
-    #         author=random.choice(faker_users),
-    #         category=random.choice(faker_categories)
-    #     )
-    #     for tag in random.sample(faker_tags, random.randint(2, 5)):
-    #         article.tags.append(tag)
-    #     session.add(article)
+    faker_categories = [Category(name=faker.word()) for i in range(5)]
+    session.add_all(faker_categories)
+
+    faker_tags= [Tag(name=faker.word()) for i in range(20)]
+    session.add_all(faker_tags)
+
+    for i in range(100):
+        article = Article(
+            title=faker.sentence(),
+            content=' '.join(faker.sentences(nb=random.randint(10, 20))),
+            author=random.choice(faker_users),
+            category=random.choice(faker_categories)
+        )
+        for tag in random.sample(faker_tags, random.randint(2, 5)):
+            article.tags.append(tag)
+        session.add(article)
 
     session.commit()
