@@ -61,11 +61,11 @@ class UserInfo(Base):
     userinfo = relationship('User', backref='userinfo', uselist=False)
 
 
-# user_role = Table(
-#     'user_role', Base.metadata,
-#     Column('user_id', Integer, ForeignKey('users.id')),
-#     Column('role_id', Integer, ForeignKey('roles.id'))
-# )
+user_role = Table(
+    'user_role', Base.metadata,
+    Column('user_id', Integer, ForeignKey('users.id')),
+    Column('role_id', Integer, ForeignKey('roles.id'))
+)
 
 Roles = ["法人","总经理","经理","主管","组长","工人"]
 class Role(Base):
@@ -143,22 +143,20 @@ class Scope(Base):
         return '%s(%r)' % (self.__class__.__name__, self.name)
 
 
-class Animal(Base):
+class Species(Base):
 
-    __tablename__ = 'animal'
+    __tablename__ = 'species'
 
     id = Column(Integer, primary_key=True)
-    # name = Column(String(64), nullable=False, index=True)
-    friendly_name = Column(String(64))
-    sn = Column(String(18), nullable=False, index=True)  # 身份序列号
-    birthday = Column(DateTime, nullable=False)
-    join_date = Column(DateTime, nullable=False)
-    friendly_name = Column(String(64))
-    sex = Column(String(2))
-    weight = Column(FLOAT)
-    temperature = Column(FLOAT)
-
-    cate_id = Column(Integer, ForeignKey('categories.id'))
+    name = Column(String(64), nullable=False, index=True)
+    #
+    # sn = Column(String(18), nullable=False, index=True)  # 身份序列号
+    # birthday = Column(DateTime, nullable=False)
+    # join_date = Column(DateTime, nullable=False)
+    # friendly_name = Column(String(64))
+    # sex = Column(String(2))
+    # weight = Column(FLOAT)
+    # temperature = Column(FLOAT)
 
 
 class Category(Base):
@@ -167,7 +165,7 @@ class Category(Base):
 
     id = Column(Integer, primary_key=True)
     name = Column(String(64), nullable=False, index=True)
-    animals = relationship('Animal', backref='category')
+    # animals = relationship('Animal', backref='category')
 
     def __repr__(self):
         return '%s(%r)' % (self.__class__.__name__, self.name)
@@ -218,17 +216,6 @@ if __name__ == '__main__':
         users[i].company = random.choice(companies)
 
     session.add_all(users)
-
-    animals = [
-        Animal(
-               friendly_name = faker.user_name(),
-               sn = faker.random_number(10),
-               birthday = faker.past_datetime(),
-               join_date = faker.past_datetime(),
-               category=random.choice(faker_cats)
-               ) for i in range(sum*10)]
-
-    session.add_all(animals)
 
     # animal = Species(name = Column(String(18), nullable=False, index=True)
     #                 # name="ww",
