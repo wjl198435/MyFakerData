@@ -29,6 +29,10 @@ class User(Base):
     company_id = Column(Integer, ForeignKey('companies.id'))
     company = relationship('Company', backref='company')
 
+
+    userinfo_id = Column(Integer, ForeignKey('userinfos.id'))
+    userinfo = relationship('UserInfo', backref='userinfo', uselist=False)
+
     # company = relationship('Company', secondary='user_company', backref='companies')
     # company_id = Column(Integer, ForeignKey('companies.id'))
     # company = relationship('Company', backref='company')
@@ -58,8 +62,8 @@ class UserInfo(Base):
     lon = Column(FLOAT)
     # company = Column(Integer, ForeignKey('companies.id'))
 
-    user_id = Column(Integer, ForeignKey('users.id'))
-    userinfo = relationship('User', backref='userinfo', uselist=False)
+    # user_id = Column(Integer, ForeignKey('users.id'))
+    # userinfo = relationship('User', backref='userinfo', uselist=False)
 
 
 
@@ -78,8 +82,6 @@ class Role(Base):
     id = Column(Integer, primary_key=True)
     name = Column(String(10), nullable=False, index=True)
     friendly_name = Column(String(10))
-
-
 
 
     def __repr__(self):
@@ -173,6 +175,10 @@ class Animal(Base):
     company_id = Column(Integer, ForeignKey('companies.id'))
     keepers = relationship('User', secondary='animal_keeper', backref='keepers')
 
+
+    animalinfo_id = Column(Integer, ForeignKey('animalinfos.id'))
+    animalinfo = relationship('AnimalInfo', backref='animalinfo', uselist=False)
+
 Animal_Sex = ["公","母"]
 Sick_times = [0,0,0,0,0,0,0,0,0,0,0,1,1,1,2,2,3,4,5,6,7]
 Sick_days = [1,1,1,1,2,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16]
@@ -210,8 +216,7 @@ class AnimalInfo(Base):
     health_status = Column(String(6)) # 健康状态
     action_status = Column(String(6))  #当前行为状态
 
-    animal_id = Column(Integer, ForeignKey('animals.id'))
-    animalinfo = relationship('Animal', backref='animalinfo', uselist=False)
+
 
 
     # camera = Column(Integer, ForeignKey('cameras.id'))  # 监控摄像头设备号
@@ -256,6 +261,9 @@ class Sensor(Base):
 
     # sensorinfo = relationship('Sensor', backref='sensorinfo', uselist=False)
 
+    sensorinfo_id = Column(Integer, ForeignKey('sensorinfos.id'))
+    sensorinfo = relationship('SensorInfo', backref='sensorinfo', uselist=False)
+
 
 
 class SensorInfo(Base):
@@ -274,8 +282,8 @@ class SensorInfo(Base):
 
     # company = Column(String(64))  # 使用设备单位
 
-    sensor_id = Column(Integer, ForeignKey('sensors.id'))
-    sensorinfo = relationship('Sensor', backref='sensorinfo', uselist=False)
+    # sensor_id = Column(Integer, ForeignKey('sensors.id'))
+    # sensorinfo = relationship('Sensor', backref='sensorinfo', uselist=False)
 
 #   user_id = Column(Integer, ForeignKey('users.id'))
 #   userinfo = relationship('User', backref='userinfo', uselist=False)
@@ -342,7 +350,8 @@ if __name__ == '__main__':
     faker_roles= [Role(name=Roles[i]) for i in range(len(Roles))]   # 创建用户角色
 
     for i in range(sum_user):     # 为用户添加角色
-        users[i].userinfo.append(userinfos[i])
+        # users[i].userinfo.append(userinfos[i])
+        users[i].userinfo = userinfos[i]
         users[i].role = random.choice(faker_roles)
         users[i].company = random.choice(companies)
 
@@ -383,7 +392,8 @@ if __name__ == '__main__':
                 temperature = random.uniform(36.5,40.0),
         )
 
-        animal.animalinfo.append(animalinfos[i])
+        # animal.animalinfo.append(animalinfos[i])
+        animal.animalinfo = animalinfos[i]
 
         for keeper in random.sample(users, random.randint(1, 3)):
             animal.keepers.append(keeper)
@@ -408,9 +418,12 @@ if __name__ == '__main__':
         for i in range(sum_sensors) ]
 
     for i in range(sum_sensors):
+        sensors[i].sensorinfo = sensorinfos[i]
+        # users[i].userinfo = userinfos[i]
         # users[i].userinfo.append(userinfos[i])
         #  users[i].userinfo.append(userinfos[i])
-        sensors[i].sensorinfo.append(sensorinfos[i])
+        # sensors[i].sensorinfo.append(sensorinfos[i])
+        # sensorinfos[i].sensor.append(sensors[i])
 
     session.add_all(sensors)
     # session.add_all(sensorinfos)

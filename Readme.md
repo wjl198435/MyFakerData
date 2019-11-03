@@ -12,7 +12,28 @@
  conda acitvate homeassistant
  conda install -n homeassistant paho-mqtt
 ```
-# influx
+## influx
+
+## tables （ one to on）
+```$xslt
+class Sensor(Base):
+    __tablename__ = 'sensors'
+    id = Column(Integer, primary_key=True)
+
+    sensorinfo_id = Column(Integer, ForeignKey('sensorinfos.id'))
+    sensorinfo = relationship('SensorInfo', backref='sensorinfo', uselist=False)
+    
+class SensorInfo(Base):
+
+    __tablename__ = 'sensorinfos'
+    id = Column(Integer, primary_key=True)    
+
+
+for i in range(sum_sensors):
+        sensors[i].sensorinfo = sensorinfos[i]
+
+
+```
 
 ## 基于conda faker sqlalchemy 生产模拟数据，并基于mqtt 进行发送
 
