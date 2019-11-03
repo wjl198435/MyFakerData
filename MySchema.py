@@ -13,13 +13,11 @@ database = 'iot_db'
 engine = create_engine(DB_URL.format(database))
 Base = declarative_base()
 
-
-
 class User(Base):
 
     __tablename__ = 'users'
 
-    id = Column(Integer, primary_key=True)
+    id = Column(Integer, primary_key=True,index=True)
     username = Column(String(64), nullable=False, index=True)
     password = Column(String(64), nullable=False)
 
@@ -49,14 +47,14 @@ class UserInfo(Base):
 
     __tablename__ = 'userinfos'
 
-    id = Column(Integer, primary_key=True)
+    id = Column(Integer, primary_key=True,index=True)
     email = Column(String(64), nullable=False, index=True)
     friendly_name = Column(String(64))
     qq = Column(String(11))
     phone = Column(String(11))
-    link = Column(String(64))
+    # link = Column(String(64))
     join_datetime = Column(DateTime,nullable=False)
-    roles = Column(String(11))
+    # roles = Column(String(11))
 
     lat = Column(FLOAT)
     lon = Column(FLOAT)
@@ -79,8 +77,8 @@ class Role(Base):
 
     __tablename__ = 'roles'
 
-    id = Column(Integer, primary_key=True)
-    name = Column(String(10), nullable=False, index=True)
+    id = Column(Integer, primary_key=True,index=True)
+    name = Column(String(10), nullable=False, index=True,unique=True)
     friendly_name = Column(String(10))
 
 
@@ -99,7 +97,7 @@ class Company(Base):
 
     __tablename__ = 'companies'
 
-    id = Column(Integer, primary_key=True)
+    id = Column(Integer, primary_key=True,index=True)
     name = Column(String(64))  # 公司名
     corporate =  Column(String(64),nullable=False, index=True)  # 法人
 
@@ -142,8 +140,8 @@ class Scope(Base):
 
     __tablename__ = 'scopes'
 
-    id = Column(Integer, primary_key=True)
-    name = Column(String(10), nullable=False, index=True)
+    id = Column(Integer, primary_key=True,index=True)
+    name = Column(String(10), nullable=False, index=True,unique=True)
     def __repr__(self):
         return '%s(%r)' % (self.__class__.__name__, self.name)
 
@@ -160,7 +158,7 @@ class Animal(Base):
 
     __tablename__ = 'animals'
 
-    id = Column(Integer, primary_key=True)
+    id = Column(Integer, primary_key=True,index=True)
     # name = Column(String(64), nullable=False, index=True)
     friendly_name = Column(String(64))
     sn = Column(String(18), nullable=False, index=True)  # 身份序列号
@@ -173,8 +171,11 @@ class Animal(Base):
 
     cate_id = Column(Integer, ForeignKey('categories.id'))
     company_id = Column(Integer, ForeignKey('companies.id'))
-    keepers = relationship('User', secondary='animal_keeper', backref='keepers')
 
+    camera_id = Column(Integer, ForeignKey('cameras.id'))
+    camera = relationship('Camera', backref='camera')
+
+    keepers = relationship('User', secondary='animal_keeper', backref='keepers')
 
     animalinfo_id = Column(Integer, ForeignKey('animalinfos.id'))
     animalinfo = relationship('AnimalInfo', backref='animalinfo', uselist=False)
@@ -192,7 +193,7 @@ class AnimalInfo(Base):
 
     __tablename__ = 'animalinfos'
 
-    id = Column(Integer, primary_key=True)
+    id = Column(Integer, primary_key=True,index=True)
 
     address = Column(String(64))  # 所属单元(那栋楼、那单元)
     sick_times = Column(Integer)  # 生病次数
@@ -228,19 +229,21 @@ class Category(Base):
 
     __tablename__ = 'categories'
 
-    id = Column(Integer, primary_key=True)
+    id = Column(Integer, primary_key=True,index=True)
     name = Column(String(64), nullable=False, index=True)
     animals = relationship('Animal', backref='category')
 
     def __repr__(self):
         return '%s(%r)' % (self.__class__.__name__, self.name)
 
-
+domain =['temperature','humidity','luminance','aqi','fans','NH3','switch']
+domain_friendly_name = ['温度','湿度','亮度','空气质量','风速','氨气','开关']
+unit =['℃','RH%','lu','pm2.5','m/s','g/L' ,'']
 
 class Sensor(Base):
     __tablename__ = 'sensors'
 
-    id = Column(Integer, primary_key=True)
+    id = Column(Integer, primary_key=True,index=True)
     sn = Column(String(20),nullable=False, index=True)   # 设备序列号
     friendly_name = Column(String(64))  # 设备名称
 
@@ -259,8 +262,6 @@ class Sensor(Base):
     last_updated = Column(DateTime)  #最后更新时间
     created = Column(DateTime)     # 创建时间
 
-    # sensorinfo = relationship('Sensor', backref='sensorinfo', uselist=False)
-
     sensorinfo_id = Column(Integer, ForeignKey('sensorinfos.id'))
     sensorinfo = relationship('SensorInfo', backref='sensorinfo', uselist=False)
 
@@ -270,7 +271,7 @@ class SensorInfo(Base):
 
     __tablename__ = 'sensorinfos'
 
-    id = Column(Integer, primary_key=True)
+    id = Column(Integer, primary_key=True,index=True)
 
     lat = Column(FLOAT)  # 经纬度
     lon = Column(FLOAT)  # 经纬度
@@ -280,13 +281,50 @@ class SensorInfo(Base):
     manufacturers = Column(String(18))   # 设备提供商
     manufactures_tel = Column(String(11))  # 设备提供商联系电话
 
-    # company = Column(String(64))  # 使用设备单位
+    def __repr__(self):
+        return '%s(%r)' % (self.__class__.__name__, self.name)
 
-    # sensor_id = Column(Integer, ForeignKey('sensors.id'))
-    # sensorinfo = relationship('Sensor', backref='sensorinfo', uselist=False)
 
-#   user_id = Column(Integer, ForeignKey('users.id'))
-#   userinfo = relationship('User', backref='userinfo', uselist=False)
+class Camera(Base):
+    __tablename__ = 'cameras'
+
+    id = Column(Integer, primary_key=True,index=True)
+    sn = Column(String(20),nullable=False, index=True)   # 设备序列号
+    friendly_name = Column(String(64))  # 设备名称
+
+    event_id = Column(Integer)  # 事件id
+    entity_id = Column(Integer)  # 运行实例id
+
+    model = Column(String(20))  # 产品型号
+    mac = Column(String(17))  # mac 地址
+    loc = Column(String(64))  # 安装位置
+    domain = Column(String(10))  # 设备类型
+    unit = Column(String(10)) # 设备单位
+    state = Column(String(10))  # 当前状态
+    attributes = Column(Text)  # 当前属性
+
+    last_changed = Column(DateTime)  #最后改变时间
+    last_updated = Column(DateTime)  #最后更新时间
+    created = Column(DateTime)     # 创建时间
+
+    camerainfo_id = Column(Integer, ForeignKey('camerainfos.id'))
+    camerainfo = relationship('CameraInfo', backref='camerainfo', uselist=False)
+
+
+
+class CameraInfo(Base):
+
+    __tablename__ = 'camerainfos'
+
+    id = Column(Integer, primary_key=True,index=True)
+
+    lat = Column(FLOAT)  # 经纬度
+    lon = Column(FLOAT)  # 经纬度
+    address = Column(String(64))
+
+    power = Column(FLOAT)  # 功耗
+    manufacturers = Column(String(18))   # 设备提供商
+    manufactures_tel = Column(String(11))  # 设备提供商联系电话
 
     def __repr__(self):
         return '%s(%r)' % (self.__class__.__name__, self.name)
@@ -300,11 +338,15 @@ if __name__ == '__main__':
     sum_user = sum_company*10
     sum_animal = sum_user*5
 
-    sum_sensors = 300
+    sum_sensors = 100
+    sum_cameras =300
 
-    faker_scopes= [Scope(name=CategoryName[i]) for i in range(len(CategoryName))]
-
-    faker_cats= [Category(name=CategoryName[i]) for i in range(len(CategoryName))]  # 主营物种范围
+    try:
+        faker_scopes= [Scope(name=CategoryName[i]) for i in range(len(CategoryName))]
+        faker_cats= [Category(name=CategoryName[i]) for i in range(len(CategoryName))]  # 主营物种范围
+        faker_roles= [Role(name=Roles[i]) for i in range(len(Roles))]   # 创建用户角色
+    except :
+        pass
 
     companies = [Company(       # 构建公司信息
         corporate =faker.name(),
@@ -333,7 +375,7 @@ if __name__ == '__main__':
     session.add_all(companies)
 
     users = [User(      #构建用户信息
-        username=faker.name(),
+        username=faker.user_name(),
         password=faker.random_number(digits=random.randint(4, 10)),
     ) for i in range(sum_user)]
 
@@ -341,13 +383,11 @@ if __name__ == '__main__':
         friendly_name=faker.name(),
         email = faker.ascii_company_email(),
         phone=faker.phone_number(),
+        qq = faker.random_number(digits=random.randint(4, 10)),
         lat = faker.latitude(),
         lon = faker.longitude(),
         join_datetime=faker.past_datetime(),
     ) for i in range(sum_user)]
-
-
-    faker_roles= [Role(name=Roles[i]) for i in range(len(Roles))]   # 创建用户角色
 
     for i in range(sum_user):     # 为用户添加角色
         # users[i].userinfo.append(userinfos[i])
@@ -356,6 +396,25 @@ if __name__ == '__main__':
         users[i].company = random.choice(companies)
 
     session.add_all(users)
+
+
+    # 摄像头
+    cameras = [
+        Camera(
+            sn = faker.isbn10(),
+            model = faker.word(),
+            loc = faker.street_name(),
+        )
+        for i in range(sum_cameras) ]
+
+    camerainfos = [
+        CameraInfo(
+            address = faker.street_address()
+        )
+        for i in range(sum_cameras) ]
+
+    for i in range(sum_cameras):
+        cameras[i].camerainfo = camerainfos[i]
 
 
     animalinfos = [AnimalInfo(
@@ -390,6 +449,8 @@ if __name__ == '__main__':
                 sex = random.choice(Animal_Sex),
                 weight = random.uniform(30.0,450.0),
                 temperature = random.uniform(36.5,40.0),
+                camera = random.choice(cameras),
+
         )
 
         # animal.animalinfo.append(animalinfos[i])
@@ -403,13 +464,27 @@ if __name__ == '__main__':
         # print(animal.birthday,":",join_date)
         session.add(animal)
 
+
+    # model = Column(String(20))  # 产品型号
+    # mac = Column(String(17))  # mac 地址
+    # loc = Column(String(64))  # 安装位置
+    # domain = Column(String(10))  # 设备类型
+    # unit = Column(String(10)) # 设备单位
+    # state = Column(String(10))  # 当前状态
+    # attributes = Column(Text)  # 当前属性
+    #
+    # last_changed = Column(DateTime)  #最后改变时间
+    # last_updated = Column(DateTime)  #最后更新时间
+    # created = Column(DateTime)     # 创建时间
+
+
     sensors = [
         Sensor(
-            sn = faker.isbn10()
+            sn = faker.isbn10(),
+            model = faker.word(),
+            loc = faker.street_name(),
         )
         for i in range(sum_sensors) ]
-
-
 
     sensorinfos = [
         SensorInfo(
@@ -419,13 +494,11 @@ if __name__ == '__main__':
 
     for i in range(sum_sensors):
         sensors[i].sensorinfo = sensorinfos[i]
-        # users[i].userinfo = userinfos[i]
-        # users[i].userinfo.append(userinfos[i])
-        #  users[i].userinfo.append(userinfos[i])
-        # sensors[i].sensorinfo.append(sensorinfos[i])
-        # sensorinfos[i].sensor.append(sensors[i])
 
-    session.add_all(sensors)
+
+
+
+    session.add_all(cameras)
     # session.add_all(sensorinfos)
 
     session.commit()
