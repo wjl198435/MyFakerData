@@ -413,6 +413,8 @@ if __name__ == '__main__':
         )
         for i in range(sum_cameras) ]
 
+    session.add_all(cameras)
+
     for i in range(sum_cameras):
         cameras[i].camerainfo = camerainfos[i]
 
@@ -494,11 +496,7 @@ if __name__ == '__main__':
 
     for i in range(sum_sensors):
         sensors[i].sensorinfo = sensorinfos[i]
-
-
-
-
-    session.add_all(cameras)
+    session.add_all(sensors)
     # session.add_all(sensorinfos)
 
     session.commit()
