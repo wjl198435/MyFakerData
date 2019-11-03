@@ -98,6 +98,7 @@ class Company(Base):
     __tablename__ = 'companies'
 
     id = Column(Integer, primary_key=True)
+    name = Column(String(64))  # 公司名
     corporate =  Column(String(64),nullable=False, index=True)  # 法人
 
     scale = Column(Integer)  # 养殖现规模
@@ -112,15 +113,13 @@ class Company(Base):
     province = Column(String(10))
     city = Column(String(16))  # 所在城市
     street_address =  Column(String(50))  # 街道
-    name = Column(String(64))  # 公司名
-    address = Column(String(64))  # 地址
+
+    # address = Column(String(64))  # 地址
     contact = Column(String(11))  # 联系电话
-    scopes_id = Column(Integer, ForeignKey('companies.id'))
+    # scopes_id = Column(Integer, ForeignKey('companies.id'))
     scopes = relationship('Scope', secondary='company_scope', backref='companies')
-
-    animals = relationship('Animal', backref='producer')
-
-    # scope = relationship('Scope', secondary='company_scope', backref='scopes')
+    animals = relationship('Animal', backref='producer')   # 拥有产品
+    # scope = relationship('Scope', secondary='company_scope', backref='scopes')  # 营业范围
     # work = relationship('User', backref='work')
 
     def __repr__(self):
@@ -244,10 +243,47 @@ if __name__ == '__main__':
 
     faker_cats= [Category(name=CategoryName[i]) for i in range(len(CategoryName))]  # 主营物种范围
 
+
+#     name = Column(String(64))  # 公司名
+# corporate =  Column(String(64),nullable=False, index=True)  # 法人
+#
+# scale = Column(Integer)  # 养殖现规模
+# total_scale = Column(Integer)  # 总规模
+# social_credit_issue = Column(String(18))  # 企业社会信用
+# credit_rate = Column(Integer)  # 信用评级
+#
+# lat = Column(FLOAT)  # 经纬度
+# lon = Column(FLOAT)  # 经纬度
+# link = Column(String(64))  # 网站链接
+# license_id = Column(Integer)   # 获取授权商品id起始编号
+# province = Column(String(10))
+# city = Column(String(16))  # 所在城市
+# street_address =  Column(String(50))  # 街道
+#
+# address = Column(String(64))  # 地址
+# contact = Column(String(11))  # 联系电话
+# scopes_id = Column(Integer, ForeignKey('companies.id'))
+# scopes = relationship('Scope', secondary='company_scope', backref='companies')
+
+
     companies = [Company(       # 构建公司信息
         corporate =faker.name(),
         name=faker.company(),
+        scale =random.randint(100,1000)*100,  # 当前养殖现规模
+        total_scale =random.randint(100,1000)*200,  # 总养殖现规模
+        social_credit_issue = faker.isbn13(),
+        credit_rate = random.randint(0,10),
 
+        lat=faker.latitude(),
+        lon=faker.longitude(),
+
+        link = faker.url() , # 企业网站
+        license_id = random.randint(1,10000000)*100,
+        province = faker.province(),
+        city = faker.district(),
+        street_address = faker.street_address(),
+        contact = faker.phone_number(),
+        # scopes = [random.sample(faker_scopes, random.randint(1, 2))]
     ) for i in range(sum_company)]
 
     for i in range(sum_company):      # 添加企业 营业范围
@@ -291,7 +327,7 @@ if __name__ == '__main__':
         day_meters = random.randint(1000,20000),  # 当天运动米数
         vaccine_times = random.randint(2,5), # 注射疫苗次数
         total_feed_weight = random.uniform(60000.0,1000000.0),  # 总消耗饲料量
-        total_feed_times = random.randint(600,1000),   # 总进食次数
+        total_feed_times = random.randint(10,2000),   # 总进食次数
         total_feed_seconds = random.randint(14400000,28800000),  # 总进食时长
         day_feed_weight = random.uniform(0.0,5000.0),  # 当天进食总量
         day_feed_times = random.randint(0,8),  # 当天进食次数
