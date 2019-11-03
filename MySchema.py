@@ -147,13 +147,14 @@ class Scope(Base):
         return '%s(%r)' % (self.__class__.__name__, self.name)
 
 
-animal_user = Table(
-    'animal_user', Base.metadata,
+animal_keeper = Table(
+    'animal_keeper', Base.metadata,
     Column('user_id', Integer, ForeignKey('users.id')),
     Column('animal_id', Integer, ForeignKey('animals.id'))
 )
 
-Animal_Sex = ["公","母"]
+
+
 class Animal(Base):
 
     __tablename__ = 'animals'
@@ -168,16 +169,55 @@ class Animal(Base):
     sex = Column(String(2))
     weight = Column(FLOAT)
     temperature = Column(FLOAT)
+
     cate_id = Column(Integer, ForeignKey('categories.id'))
-
     company_id = Column(Integer, ForeignKey('companies.id'))
+    keepers = relationship('User', secondary='animal_keeper', backref='keepers')
 
-    keepers = relationship('User', secondary='animal_user', backref='keepers')
+Animal_Sex = ["公","母"]
+Sick_times = [0,0,0,0,0,0,0,0,0,0,0,1,1,1,2,2,3,4,5,6,7]
+Sick_days = [1,1,1,1,2,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16]
 
-    # company_id = Column(Integer, ForeignKey('companies.id'))
-    # animal = relationship('company', backref='animal', uselist=False)
+health_stats = ['健康','受伤','咳嗽','皮肤过敏','发烧','生病','死亡']
+health_stats_index = [0,0,0,0,0,0,0,0,0,0,0,1,2,3,4,5,5,6]
+
+action_status = ['进食','睡眠','运动','打斗']  # 行为状态
+action_status_index = [0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,2,2,2,2,3]
+class AnimalInfo(Base):
+
+    __tablename__ = 'animalinfos'
+
+    id = Column(Integer, primary_key=True)
+
+    address = Column(String(64))  # 所属单元(那栋楼、那单元)
+    sick_times = Column(Integer)  # 生病次数
+    total_sick_days = Column(Integer)  # 生病总天数
+
+    total_meters = Column(Integer)  # 运动总米数
+    day_meters = Column(Integer)  # 当天运动米数
+    vaccine_times = Column(Integer)  # 注射疫苗次数
+    total_feed_weight = Column(FLOAT)  # 总消耗饲料量
+    total_feed_times = Column(Integer)   # 总进食次数
+    total_feed_seconds = Column(Integer)  # 总进食时长
+    day_feed_weight = Column(FLOAT)  # 当天进食总量
+    day_feed_times = Column(Integer)  # 当天进食次数
+    day_feed_seconds = Column(Integer)  # 当天进食时长
+    day_cough_times = Column(Integer)  # 当天咳嗽、喷嚏次数
+
+    lat = Column(FLOAT)  # 经纬度
+    lon = Column(FLOAT)  # 经纬度
+
+    health_rate = Column(Integer)  # 健康等级
+    health_status = Column(String(6)) # 健康状态
+    action_status = Column(String(6))  #当前行为状态
+
+    animal_id = Column(Integer, ForeignKey('animals.id'))
+    animalinfo = relationship('Animal', backref='animalinfo', uselist=False)
 
 
+    # camera = Column(Integer, ForeignKey('cameras.id'))  # 监控摄像头设备号
+    # current_state = Column(Integer, ForeignKey('states.id'))  # 进食、睡眠、运动，打斗
+    # health_state = Column(Integer, ForeignKey('healthes.id'))  # 健康状态
 
 
 class Category(Base):
@@ -196,7 +236,9 @@ if __name__ == '__main__':
     Base.metadata.create_all(engine)
     Session = sessionmaker(bind=engine)
     session = Session()
-    sum = 10
+    sum_company = 10
+    sum_user = sum_company*10
+    sum_animal = sum_user*5
 
     faker_scopes= [Scope(name=CategoryName[i]) for i in range(len(CategoryName))]
 
@@ -206,9 +248,9 @@ if __name__ == '__main__':
         corporate =faker.name(),
         name=faker.company(),
 
-    ) for i in range(sum)]
+    ) for i in range(sum_company)]
 
-    for i in range(sum):      # 添加企业 营业范围
+    for i in range(sum_company):      # 添加企业 营业范围
         for scope in random.sample(faker_scopes, random.randint(1, 2)):
             companies[i].scopes.append(scope)
 
@@ -217,7 +259,7 @@ if __name__ == '__main__':
     users = [User(      #构建用户信息
         username=faker.name(),
         password=faker.random_number(digits=random.randint(4, 10)),
-    ) for i in range(sum)]
+    ) for i in range(sum_user)]
 
     userinfos = [UserInfo(   # 构建用户详情
         friendly_name=faker.name(),
@@ -226,42 +268,57 @@ if __name__ == '__main__':
         lat = faker.latitude(),
         lon = faker.longitude(),
         join_datetime=faker.past_datetime(),
-    ) for i in range(sum)]
+    ) for i in range(sum_user)]
 
 
     faker_roles= [Role(name=Roles[i]) for i in range(len(Roles))]   # 创建用户角色
 
-    for i in range(sum):     # 为用户添加角色
+    for i in range(sum_user):     # 为用户添加角色
         users[i].userinfo.append(userinfos[i])
         users[i].role = random.choice(faker_roles)
         users[i].company = random.choice(companies)
 
     session.add_all(users)
 
-    # animals = [        #创建动物
-    #     Animal(
-    #            friendly_name = faker.user_name(),
-    #            sn = faker.random_number(10),
-    #            birthday = faker.past_datetime(),
-    #            join_date = faker.past_datetime(),
-    #            category=random.choice(faker_cats)
-    #            ) for i in range(sum*10)]
-    for i in range(sum*10):
+
+    animalinfos = [AnimalInfo(
+        address=faker.street_address(),
+        lat=faker.latitude(),
+        lon=faker.longitude(),
+        sick_times = random.choice(Sick_times), # 生病次数
+        total_sick_days = random.choice(Sick_days),  # 生病总天数
+        total_meters = random.randint(1000000,10000000), # 运动总米数
+        day_meters = random.randint(1000,20000),  # 当天运动米数
+        vaccine_times = random.randint(2,5), # 注射疫苗次数
+        total_feed_weight = random.uniform(60000.0,1000000.0),  # 总消耗饲料量
+        total_feed_times = random.randint(600,1000),   # 总进食次数
+        total_feed_seconds = random.randint(14400000,28800000),  # 总进食时长
+        day_feed_weight = random.uniform(0.0,5000.0),  # 当天进食总量
+        day_feed_times = random.randint(0,8),  # 当天进食次数
+        day_feed_seconds = random.randint(0,7200),  # 当天进食时长
+        day_cough_times = random.randint(0,100), # 当天咳嗽、喷嚏次数
+        health_rate = random.randint(0,10),
+        health_status = health_stats[random.choice(health_stats_index)],
+        action_status = action_status[random.choice(action_status_index)]
+
+    ) for i in range(sum_animal)]
+
+    for i in range(sum_animal):
         animal = Animal(
                 friendly_name = faker.user_name(),
                 sn = faker.random_number(10),
-                       birthday = faker.past_datetime()-datetime.timedelta(days=faker.random_int(min=30,max=180)),
-                       category=random.choice(faker_cats),
-                       producer = random.choice(companies),
-                       sex = random.choice(Animal_Sex),
-                       weight = random.uniform(30.0,450.0),
-                       temperature = random.uniform(36.5,40.0),
-
+                birthday = faker.past_datetime()-datetime.timedelta(days=faker.random_int(min=30,max=180)),
+                category=random.choice(faker_cats),
+                producer = random.choice(companies),
+                sex = random.choice(Animal_Sex),
+                weight = random.uniform(30.0,450.0),
+                temperature = random.uniform(36.5,40.0),
         )
+
+        animal.animalinfo.append(animalinfos[i])
 
         for keeper in random.sample(users, random.randint(1, 3)):
             animal.keepers.append(keeper)
-
         delta = datetime.timedelta(days=faker.random_int(min=30,max=60))
         join_date = animal.birthday+delta
         animal.join_date = join_date
@@ -270,25 +327,6 @@ if __name__ == '__main__':
 
 
 
-
-
-    # animal = Species(name = Column(String(18), nullable=False, index=True)
-    #                 # name="ww",
-    #                 # birthday = faker.past_datetime(),
-    #                 # join_date = faker.past_datetime(),
-    #                 # category=random.choice(faker_cats)
-    #                 )
-    # session.add(animal)
-    ## 生成动物数据
-    # for i in range(10*sum):
-    #     animal = Animal(
-    #                     sn = Column(String(18), nullable=False, index=True)
-    #                     # name="ww",
-    #                     # birthday = faker.past_datetime(),
-    #                     # join_date = faker.past_datetime(),
-    #                     # category=random.choice(faker_cats)
-    #                     )
-    #     session.add(animal)
 
 
     session.commit()
