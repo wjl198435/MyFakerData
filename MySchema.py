@@ -1,3 +1,4 @@
+import datetime
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, sessionmaker
@@ -61,6 +62,8 @@ class UserInfo(Base):
     userinfo = relationship('User', backref='userinfo', uselist=False)
 
 
+
+
 # user_role = Table(
 #     'user_role', Base.metadata,
 #     Column('user_id', Integer, ForeignKey('users.id')),
@@ -115,6 +118,7 @@ class Company(Base):
     scopes_id = Column(Integer, ForeignKey('companies.id'))
     scopes = relationship('Scope', secondary='company_scope', backref='companies')
 
+    animals = relationship('Animal', backref='producer')
 
     # scope = relationship('Scope', secondary='company_scope', backref='scopes')
     # work = relationship('User', backref='work')
@@ -143,9 +147,16 @@ class Scope(Base):
         return '%s(%r)' % (self.__class__.__name__, self.name)
 
 
+animal_user = Table(
+    'animal_user', Base.metadata,
+    Column('user_id', Integer, ForeignKey('users.id')),
+    Column('animal_id', Integer, ForeignKey('animals.id'))
+)
+
+Animal_Sex = ["公","母"]
 class Animal(Base):
 
-    __tablename__ = 'animal'
+    __tablename__ = 'animals'
 
     id = Column(Integer, primary_key=True)
     # name = Column(String(64), nullable=False, index=True)
@@ -157,8 +168,16 @@ class Animal(Base):
     sex = Column(String(2))
     weight = Column(FLOAT)
     temperature = Column(FLOAT)
-
     cate_id = Column(Integer, ForeignKey('categories.id'))
+
+    company_id = Column(Integer, ForeignKey('companies.id'))
+
+    keepers = relationship('User', secondary='animal_user', backref='keepers')
+
+    # company_id = Column(Integer, ForeignKey('companies.id'))
+    # animal = relationship('company', backref='animal', uselist=False)
+
+
 
 
 class Category(Base):
@@ -181,26 +200,26 @@ if __name__ == '__main__':
 
     faker_scopes= [Scope(name=CategoryName[i]) for i in range(len(CategoryName))]
 
-    faker_cats= [Category(name=CategoryName[i]) for i in range(len(CategoryName))]
+    faker_cats= [Category(name=CategoryName[i]) for i in range(len(CategoryName))]  # 主营物种范围
 
-    companies = [Company(
+    companies = [Company(       # 构建公司信息
         corporate =faker.name(),
         name=faker.company(),
 
     ) for i in range(sum)]
 
-    for i in range(sum):
+    for i in range(sum):      # 添加企业 营业范围
         for scope in random.sample(faker_scopes, random.randint(1, 2)):
             companies[i].scopes.append(scope)
 
     session.add_all(companies)
 
-    users = [User(
+    users = [User(      #构建用户信息
         username=faker.name(),
         password=faker.random_number(digits=random.randint(4, 10)),
     ) for i in range(sum)]
 
-    userinfos = [UserInfo(
+    userinfos = [UserInfo(   # 构建用户详情
         friendly_name=faker.name(),
         email = faker.ascii_company_email(),
         phone=faker.phone_number(),
@@ -210,25 +229,48 @@ if __name__ == '__main__':
     ) for i in range(sum)]
 
 
-    faker_roles= [Role(name=Roles[i]) for i in range(len(Roles))]
+    faker_roles= [Role(name=Roles[i]) for i in range(len(Roles))]   # 创建用户角色
 
-    for i in range(sum):
+    for i in range(sum):     # 为用户添加角色
         users[i].userinfo.append(userinfos[i])
         users[i].role = random.choice(faker_roles)
         users[i].company = random.choice(companies)
 
     session.add_all(users)
 
-    animals = [
-        Animal(
-               friendly_name = faker.user_name(),
-               sn = faker.random_number(10),
-               birthday = faker.past_datetime(),
-               join_date = faker.past_datetime(),
-               category=random.choice(faker_cats)
-               ) for i in range(sum*10)]
+    # animals = [        #创建动物
+    #     Animal(
+    #            friendly_name = faker.user_name(),
+    #            sn = faker.random_number(10),
+    #            birthday = faker.past_datetime(),
+    #            join_date = faker.past_datetime(),
+    #            category=random.choice(faker_cats)
+    #            ) for i in range(sum*10)]
+    for i in range(sum*10):
+        animal = Animal(
+                friendly_name = faker.user_name(),
+                sn = faker.random_number(10),
+                       birthday = faker.past_datetime()-datetime.timedelta(days=faker.random_int(min=30,max=180)),
+                       category=random.choice(faker_cats),
+                       producer = random.choice(companies),
+                       sex = random.choice(Animal_Sex),
+                       weight = random.uniform(30.0,450.0),
+                       temperature = random.uniform(36.5,40.0),
 
-    session.add_all(animals)
+        )
+
+        for keeper in random.sample(users, random.randint(1, 3)):
+            animal.keepers.append(keeper)
+
+        delta = datetime.timedelta(days=faker.random_int(min=30,max=60))
+        join_date = animal.birthday+delta
+        animal.join_date = join_date
+        # print(animal.birthday,":",join_date)
+        session.add(animal)
+
+
+
+
 
     # animal = Species(name = Column(String(18), nullable=False, index=True)
     #                 # name="ww",
