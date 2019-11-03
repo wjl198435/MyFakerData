@@ -1,7 +1,7 @@
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, sessionmaker
-from sqlalchemy import Column, String, Integer, Text, ForeignKey, Table
+from sqlalchemy import Column, String, Integer, Text, ForeignKey, Table ,Json
 import random
 from faker import Faker
 faker = Faker(locale='zh_CN')

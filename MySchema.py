@@ -2,7 +2,7 @@ import datetime
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, sessionmaker
-from sqlalchemy import Column, String, Integer, Text, ForeignKey, Table, DateTime, FLOAT
+from sqlalchemy import Column, String, Integer, Text, ForeignKey, Table, DateTime, FLOAT, Text
 import random
 from faker import Faker
 faker = Faker(locale='zh_CN')
@@ -231,6 +231,59 @@ class Category(Base):
         return '%s(%r)' % (self.__class__.__name__, self.name)
 
 
+
+class Sensor(Base):
+    __tablename__ = 'sensors'
+
+    id = Column(Integer, primary_key=True)
+    sn = Column(String(20),nullable=False, index=True)   # 设备序列号
+    friendly_name = Column(String(64))  # 设备名称
+
+    event_id = Column(Integer)  # 事件id
+    entity_id = Column(Integer)  # 运行实例id
+
+    model = Column(String(20))  # 产品型号
+    mac = Column(String(17))  # mac 地址
+    loc = Column(String(64))  # 安装位置
+    domain = Column(String(10))  # 设备类型
+    unit = Column(String(10)) # 设备单位
+    state = Column(String(10))  # 当前状态
+    attributes = Column(Text)  # 当前属性
+
+    last_changed = Column(DateTime)  #最后改变时间
+    last_updated = Column(DateTime)  #最后更新时间
+    created = Column(DateTime)     # 创建时间
+
+    # sensorinfo = relationship('Sensor', backref='sensorinfo', uselist=False)
+
+
+
+class SensorInfo(Base):
+
+    __tablename__ = 'sensorinfos'
+
+    id = Column(Integer, primary_key=True)
+
+    lat = Column(FLOAT)  # 经纬度
+    lon = Column(FLOAT)  # 经纬度
+    address = Column(String(64))
+
+    power = Column(FLOAT)  # 功耗
+    manufacturers = Column(String(18))   # 设备提供商
+    manufactures_tel = Column(String(11))  # 设备提供商联系电话
+
+    # company = Column(String(64))  # 使用设备单位
+
+    sensor_id = Column(Integer, ForeignKey('sensors.id'))
+    sensorinfo = relationship('Sensor', backref='sensorinfo', uselist=False)
+
+#   user_id = Column(Integer, ForeignKey('users.id'))
+#   userinfo = relationship('User', backref='userinfo', uselist=False)
+
+    def __repr__(self):
+        return '%s(%r)' % (self.__class__.__name__, self.name)
+
+
 if __name__ == '__main__':
     Base.metadata.create_all(engine)
     Session = sessionmaker(bind=engine)
@@ -239,32 +292,11 @@ if __name__ == '__main__':
     sum_user = sum_company*10
     sum_animal = sum_user*5
 
+    sum_sensors = 300
+
     faker_scopes= [Scope(name=CategoryName[i]) for i in range(len(CategoryName))]
 
     faker_cats= [Category(name=CategoryName[i]) for i in range(len(CategoryName))]  # 主营物种范围
-
-
-#     name = Column(String(64))  # 公司名
-# corporate =  Column(String(64),nullable=False, index=True)  # 法人
-#
-# scale = Column(Integer)  # 养殖现规模
-# total_scale = Column(Integer)  # 总规模
-# social_credit_issue = Column(String(18))  # 企业社会信用
-# credit_rate = Column(Integer)  # 信用评级
-#
-# lat = Column(FLOAT)  # 经纬度
-# lon = Column(FLOAT)  # 经纬度
-# link = Column(String(64))  # 网站链接
-# license_id = Column(Integer)   # 获取授权商品id起始编号
-# province = Column(String(10))
-# city = Column(String(16))  # 所在城市
-# street_address =  Column(String(50))  # 街道
-#
-# address = Column(String(64))  # 地址
-# contact = Column(String(11))  # 联系电话
-# scopes_id = Column(Integer, ForeignKey('companies.id'))
-# scopes = relationship('Scope', secondary='company_scope', backref='companies')
-
 
     companies = [Company(       # 构建公司信息
         corporate =faker.name(),
@@ -361,8 +393,26 @@ if __name__ == '__main__':
         # print(animal.birthday,":",join_date)
         session.add(animal)
 
+    sensors = [
+        Sensor(
+            sn = faker.isbn10()
+        )
+        for i in range(sum_sensors) ]
 
 
 
+    sensorinfos = [
+        SensorInfo(
+            address = faker.street_address()
+        )
+        for i in range(sum_sensors) ]
+
+    for i in range(sum_sensors):
+        # users[i].userinfo.append(userinfos[i])
+        #  users[i].userinfo.append(userinfos[i])
+        sensors[i].sensorinfo.append(sensorinfos[i])
+
+    session.add_all(sensors)
+    # session.add_all(sensorinfos)
 
     session.commit()
