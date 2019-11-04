@@ -1,4 +1,5 @@
 import datetime
+import time
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, sessionmaker
@@ -338,57 +339,42 @@ class CameraInfo(Base):
     def __repr__(self):
         return '%s(%r)' % (self.__class__.__name__, self.name)
 
-
-if __name__ == '__main__':
-    Base.metadata.create_all(engine)
-    Session = sessionmaker(bind=engine)
-    session = Session()
-    base= 1000
-    sum_company = 1*base
-    sum_user = sum_company*10
-    sum_animal = sum_user*1000
-
-    sum_sensors = 30*base
-    sum_cameras =100*base
-
-    try:
-        faker_scopes= [Scope(name=CategoryName[i]) for i in range(len(CategoryName))]
-        faker_cats= [Category(name=CategoryName[i]) for i in range(len(CategoryName))]  # 主营物种范围
-        faker_roles= [Role(name=Roles[i]) for i in range(len(Roles))]   # 创建用户角色
-    except :
-        pass
+def fake_iot_data(session,sum_company=1,sum_user=10,sum_animal=1000,sum_sensors=30,sum_cameras=100,first=False):
 
     companies = [Company(       # 构建公司信息
         corporate =faker.name(),
         name=faker.company(),
         scale =random.randint(100,1000)*100,  # 当前养殖现规模
         total_scale =random.randint(100,1000)*200,  # 总养殖现规模
-        social_credit_issue = faker.isbn13(),
+        social_credit_issue = random.randint(1,10)*10,
         credit_rate = random.randint(0,10),
 
         lat=faker.latitude(),
         lon=faker.longitude(),
 
         link = faker.url() , # 企业网站
-        license_id = random.randint(1,10000000)*100,
+        license_id = random.randint(1,10)*10,
         province = faker.province(),
         city = faker.district(),
         street_address = faker.street_address(),
         contact = faker.phone_number(),
         # scopes = [random.sample(faker_scopes, random.randint(1, 2))]
     ) for i in range(sum_company)]
+    print("生成公司信息->sum_company:{}".format(sum_company))
 
     for i in range(sum_company):      # 添加企业 营业范围
         for scope in random.sample(faker_scopes, random.randint(1, 2)):
             companies[i].scopes.append(scope)
-
+    print("生成公司详情信息")
     session.add_all(companies)
+    print("完成公司信息创建")
 
     users = [User(      #构建用户信息
         username=faker.user_name(),
         password=faker.random_number(digits=random.randint(4, 10)),
     ) for i in range(sum_user)]
 
+    print("{}:生成用户信息->sum_user:{}".format(time.time(),sum_user))
     userinfos = [UserInfo(   # 构建用户详情
         friendly_name=faker.name(),
         email = faker.ascii_company_email(),
@@ -398,15 +384,14 @@ if __name__ == '__main__':
         lon = faker.longitude(),
         join_datetime=faker.past_datetime(),
     ) for i in range(sum_user)]
-
+    print("{}:生成用户详情信息".format(time.time()))
     for i in range(sum_user):     # 为用户添加角色
         # users[i].userinfo.append(userinfos[i])
         users[i].userinfo = userinfos[i]
         users[i].role = random.choice(faker_roles)
         users[i].company = random.choice(companies)
-
     session.add_all(users)
-
+    print("{}:完成用户信息创建".format(time.time()))
 
     # 摄像头
     cameras = [
@@ -421,6 +406,8 @@ if __name__ == '__main__':
         )
         for i in range(sum_cameras) ]
 
+    print("{}:生成用户信息->cameras:{} ".format(time.time(),sum_cameras))
+
     camerainfos = [
         CameraInfo(
             loc = faker.street_name(),
@@ -429,8 +416,6 @@ if __name__ == '__main__':
             lon = faker.longitude(),
             model = faker.word(),
             mac = faker.mac_address(),
-
-
             domain = 'camera',
 
             power = random.uniform(1,5.0),  # 功耗
@@ -444,12 +429,13 @@ if __name__ == '__main__':
             live_url  = faker.image_url() #直播地址
         )
         for i in range(sum_cameras) ]
+    print("{}:生成摄像头详情信息->sum_cameras:{} ".format(time.time(),sum_cameras))
 
     session.add_all(cameras)
 
     for i in range(sum_cameras):
         cameras[i].camerainfo = camerainfos[i]
-
+    print("{}:完成摄像头详情信息->sum_cameras:{} ".format(time.time(),sum_cameras))
 
     animalinfos = [AnimalInfo(
         address=faker.street_address(),
@@ -473,17 +459,19 @@ if __name__ == '__main__':
 
     ) for i in range(sum_animal)]
 
+    print("{}:生成动物详情信息->animalinfos:{} ".format(time.time(),sum_animal))
+
     for i in range(sum_animal):
         animal = Animal(
-                friendly_name = faker.user_name(),
-                sn = faker.random_number(10),
-                birthday = faker.past_datetime()-datetime.timedelta(days=faker.random_int(min=30,max=180)),
-                category=random.choice(faker_cats),
-                producer = random.choice(companies),
-                sex = random.choice(Animal_Sex),
-                weight = random.uniform(30.0,450.0),
-                temperature = random.uniform(36.5,40.0),
-                camera = random.choice(cameras),
+            friendly_name = faker.user_name(),
+            sn = faker.random_number(10),
+            birthday = faker.past_datetime()-datetime.timedelta(days=faker.random_int(min=30,max=180)),
+            category=random.choice(faker_cats),
+            producer = random.choice(companies),
+            sex = random.choice(Animal_Sex),
+            weight = random.uniform(30.0,450.0),
+            temperature = random.uniform(36.5,40.0),
+            camera = random.choice(cameras),
 
         )
 
@@ -498,18 +486,7 @@ if __name__ == '__main__':
         # print(animal.birthday,":",join_date)
         session.add(animal)
 
-
-    # model = Column(String(20))  # 产品型号
-    # mac = Column(String(17))  # mac 地址
-    # loc = Column(String(64))  # 安装位置
-    # domain = Column(String(10))  # 设备类型
-    # unit = Column(String(10)) # 设备单位
-    # state = Column(String(10))  # 当前状态
-    # attributes = Column(Text)  # 当前属性
-    #
-    # last_changed = Column(DateTime)  #最后改变时间
-    # last_updated = Column(DateTime)  #最后更新时间
-    # created = Column(DateTime)     # 创建时间
+    print("{}:生成动物，添加动物详情信息->animalinfos:{} ".format(time.time(),sum_animal))
 
 
     sensors = [
@@ -519,6 +496,7 @@ if __name__ == '__main__':
             attributes = ' '.join(faker.sentences(nb=random.randint(2, 5))),
         )
         for i in range(sum_sensors) ]
+    print("{}:生成sensors信息->sensors:{} ".format(time.time(),sum_sensors))
 
     for i in range(sum_sensors):
         sensors[i].created = faker.past_datetime()
@@ -544,10 +522,40 @@ if __name__ == '__main__':
             manufactures_tel = faker.phone_number() , # 设备提供商联系电话
         )
         for i in range(sum_sensors) ]
-
+    print("{}:sensorinfos->sensorinfos:{} ".format(time.time(),sum_sensors))
     for i in range(sum_sensors):
         sensors[i].sensorinfo = sensorinfos[i]
 
     session.add_all(sensors)
+    print("{}:完成sensorinfos->sensorinfos:{} ".format(time.time(),sum_sensors))
 
     session.commit()
+
+if __name__ == '__main__':
+    Base.metadata.create_all(engine)
+    Session = sessionmaker(bind=engine)
+    session = Session()
+    base= 1000
+    sum_company = 1*base
+    sum_user = sum_company*10
+    sum_animal = sum_user*1000
+
+    sum_sensors = 30*base
+    sum_cameras =sum_animal/20
+
+    faker_scopes= [Scope(name=CategoryName[i]) for i in range(len(CategoryName))]
+    faker_cats= [Category(name=CategoryName[i]) for i in range(len(CategoryName))]  # 主营物种范围
+    faker_roles= [Role(name=Roles[i]) for i in range(len(Roles))]   # 创建用户角色
+    total_company = 1000
+    for i in range(total_company):
+        # sum_company=1,sum_user=10,sum_animal=1000,sum_sensors=30,sum_cameras=100
+        sum_user = faker.random_int(min=3,max=60)
+        sum_animal = sum_user*1000
+        sum_sensors = sum_user*30
+        sum_cameras = sum_animal//20
+
+        print("total_company:{}".format(total_company))
+        print("completed :{}".format(i))
+
+        fake_iot_data(session,sum_user=sum_user,sum_animal=sum_animal,sum_sensors=sum_sensors,sum_cameras=sum_cameras,first=True)
+
