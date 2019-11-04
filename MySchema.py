@@ -2,7 +2,7 @@ import datetime
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, sessionmaker
-from sqlalchemy import Column, String, Integer, Text, ForeignKey, Table, DateTime, FLOAT, Text
+from sqlalchemy import Column, String, Integer, Text, ForeignKey, Table, DateTime, FLOAT, Text,Time
 import random
 from faker import Faker
 faker = Faker(locale='zh_CN')
@@ -236,26 +236,26 @@ class Category(Base):
     def __repr__(self):
         return '%s(%r)' % (self.__class__.__name__, self.name)
 
-domain =['temperature','humidity','luminance','aqi','fans','NH3','switch']
-domain_friendly_name = ['温度','湿度','亮度','空气质量','风速','氨气','开关']
-unit =['℃','RH%','lu','pm2.5','m/s','g/L' ,'']
+domains =['temperature','humidity','luminance','aqi','fans','NH3','switch']
+sensor_friendly_name = ['温度','湿度','亮度','空气质量','风速','氨气','开关']
+sensor_unit =['℃','RH%','lu','pm2.5','m/s','g/L' ,'KW']
+sensor_states = ['空闲','打开','关闭','忙','离线','故障']
+sensor_states_index=[0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,2,2,3,4,5]
 
 class Sensor(Base):
     __tablename__ = 'sensors'
 
     id = Column(Integer, primary_key=True,index=True)
     sn = Column(String(20),nullable=False, index=True)   # 设备序列号
+
     friendly_name = Column(String(64))  # 设备名称
-
-    event_id = Column(Integer)  # 事件id
-    entity_id = Column(Integer)  # 运行实例id
-
-    model = Column(String(20))  # 产品型号
-    mac = Column(String(17))  # mac 地址
-    loc = Column(String(64))  # 安装位置
-    domain = Column(String(10))  # 设备类型
+    domain = Column(String(16))  # 设备类型
     unit = Column(String(10)) # 设备单位
-    state = Column(String(10))  # 当前状态
+
+    event_id = Column(String(255))  # 事件id
+    entity_id = Column(String(250))  # 运行实例id
+
+    state = Column(String(60))  # 当前状态
     attributes = Column(Text)  # 当前属性
 
     last_changed = Column(DateTime)  #最后改变时间
@@ -276,6 +276,10 @@ class SensorInfo(Base):
     lat = Column(FLOAT)  # 经纬度
     lon = Column(FLOAT)  # 经纬度
     address = Column(String(64))
+    loc = Column(String(64)) # 安装位置
+
+    model = Column(String(20))  # 产品型号
+    mac = Column(String(17))  # mac 地址
 
     power = Column(FLOAT)  # 功耗
     manufacturers = Column(String(18))   # 设备提供商
@@ -292,14 +296,9 @@ class Camera(Base):
     sn = Column(String(20),nullable=False, index=True)   # 设备序列号
     friendly_name = Column(String(64))  # 设备名称
 
-    event_id = Column(Integer)  # 事件id
-    entity_id = Column(Integer)  # 运行实例id
+    event_id = Column(String(255))  # 事件id
+    entity_id = Column(String(255))  # 运行实例id
 
-    model = Column(String(20))  # 产品型号
-    mac = Column(String(17))  # mac 地址
-    loc = Column(String(64))  # 安装位置
-    domain = Column(String(10))  # 设备类型
-    unit = Column(String(10)) # 设备单位
     state = Column(String(10))  # 当前状态
     attributes = Column(Text)  # 当前属性
 
@@ -317,10 +316,20 @@ class CameraInfo(Base):
     __tablename__ = 'camerainfos'
 
     id = Column(Integer, primary_key=True,index=True)
-
     lat = Column(FLOAT)  # 经纬度
     lon = Column(FLOAT)  # 经纬度
-    address = Column(String(64))
+    address = Column(String(64)) # 地理位置
+    loc  = Column(String(64)) # 安装位置
+
+    model = Column(String(20))  # 产品型号
+    mac = Column(String(17))  # mac 地址
+    domain = Column(String(10))  # 设备类型
+    unit = Column(String(10)) # 设备单位
+    capacity = Column(Text)
+
+    video_url = Column(String(128))  # 录像视频地址
+    thumb_url = Column(String(128))     #缩略图
+    live_url  = Column(String(128)) #直播地址
 
     power = Column(FLOAT)  # 功耗
     manufacturers = Column(String(18))   # 设备提供商
@@ -334,12 +343,13 @@ if __name__ == '__main__':
     Base.metadata.create_all(engine)
     Session = sessionmaker(bind=engine)
     session = Session()
-    sum_company = 10
+    base= 1000
+    sum_company = 1*base
     sum_user = sum_company*10
-    sum_animal = sum_user*5
+    sum_animal = sum_user*1000
 
-    sum_sensors = 100
-    sum_cameras =300
+    sum_sensors = 30*base
+    sum_cameras =100*base
 
     try:
         faker_scopes= [Scope(name=CategoryName[i]) for i in range(len(CategoryName))]
@@ -401,15 +411,37 @@ if __name__ == '__main__':
     # 摄像头
     cameras = [
         Camera(
-            sn = faker.isbn10(),
-            model = faker.word(),
-            loc = faker.street_name(),
+            sn = faker.random_number(digits=12),
+            state=sensor_states[random.choice(sensor_states_index)],
+            attributes = ' '.join(faker.sentences(nb=random.randint(2, 5))),
+            friendly_name = '{}#摄像头'.format(random.randint(1, 200)),
+            created = faker.past_datetime(),
+            last_changed = faker.date_time(),
+            last_updated = faker.date_time(),
         )
         for i in range(sum_cameras) ]
 
     camerainfos = [
         CameraInfo(
-            address = faker.street_address()
+            loc = faker.street_name(),
+            address = faker.street_address(),
+            lat =  faker.latitude() ,
+            lon = faker.longitude(),
+            model = faker.word(),
+            mac = faker.mac_address(),
+
+
+            domain = 'camera',
+
+            power = random.uniform(1,5.0),  # 功耗
+            manufacturers = faker.company() ,  # 设备提供商
+            manufactures_tel = faker.phone_number() , # 设备提供商联系电话
+
+            capacity = """ '体重测量','计数统计','识别身份',""" ,
+
+            video_url = faker.image_url(), # 录像视频地址
+            thumb_url = faker.image_url(),    #缩略图
+            live_url  = faker.image_url() #直播地址
         )
         for i in range(sum_cameras) ]
 
@@ -482,21 +514,40 @@ if __name__ == '__main__':
 
     sensors = [
         Sensor(
-            sn = faker.isbn10(),
-            model = faker.word(),
-            loc = faker.street_name(),
+            sn = faker.random_number(digits=12),
+            state=sensor_states[random.choice(sensor_states_index)],
+            attributes = ' '.join(faker.sentences(nb=random.randint(2, 5))),
         )
         for i in range(sum_sensors) ]
 
+    for i in range(sum_sensors):
+        sensors[i].created = faker.past_datetime()
+        sensors[i].last_changed = faker.date_time()
+        sensors[i].last_updated = faker.date_time()
+        index  = faker.random_int(min=0,max=len(domains)-1)
+        # print(domains[index],sensor_friendly_name[index],sensor_unit[index])
+        sensors[i].domain = domains[index],
+        sensors[i].friendly_name = sensor_friendly_name[index],
+        sensors[i].unit = sensor_unit[index],
+
     sensorinfos = [
         SensorInfo(
-            address = faker.street_address()
+            loc = faker.street_name(),
+            address = faker.street_address(),
+            lat =  faker.latitude() ,
+            lon = faker.longitude(),
+            model = faker.word(),
+            mac = faker.mac_address(),
+
+            power = random.uniform(0.5,5.0),  # 功耗
+            manufacturers = faker.company() ,  # 设备提供商
+            manufactures_tel = faker.phone_number() , # 设备提供商联系电话
         )
         for i in range(sum_sensors) ]
 
     for i in range(sum_sensors):
         sensors[i].sensorinfo = sensorinfos[i]
+
     session.add_all(sensors)
-    # session.add_all(sensorinfos)
 
     session.commit()
