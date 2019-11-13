@@ -125,9 +125,9 @@ class Company(Base):
     # work = relationship('User', backref='work')
 
     def __repr__(self):
-        return '%s(%r,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)' \
+        return '%s(%r,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)' \
                % (self.__class__.__name__, self.corporate,self.scale,self.total_scale,self.social_credit_issue,self.credit_rate,
-                  self.lat,self.lon,self.link,self.license_id,self.province,self.city,self.street_address,self.company,self.address,self.contact)
+                  self.lat,self.lon,self.link,self.license_id,self.province,self.city,self.street_address,self.company,self.contact)
 
 
 company_scope = Table('company_scope', Base.metadata,
@@ -366,6 +366,8 @@ def fake_iot_data(session,sum_company=1,sum_user=10,sum_animal=1000,sum_sensors=
     for i in range(sum_company):      # 添加企业 营业范围
         for scope in random.sample(faker_scopes, random.randint(1, 2)):
             companies[i].scopes.append(scope)
+        # companies[i].scope_id =
+
     print("生成公司详情信息")
     session.add_all(companies)
     print("完成公司信息创建")

@@ -243,3 +243,5 @@ f.phonenumber_prefix() #随机生成手机号段
 print(f.profile()) #随机生成档案信息
 
 f.simple_profile() #随机生成简单档案信息
+
+print(f.geohash())

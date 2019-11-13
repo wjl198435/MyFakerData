@@ -1,5 +1,5 @@
-### 参考教程 https://segmentfault.com/a/1190000012514865
-### https://www.cnblogs.com/mrchige/p/6389588.html
+### 参考教程 influx-mqqt  https://segmentfault.com/a/1190000012514865
+### sqlalchemy https://www.cnblogs.com/mrchige/p/6389588.html
 ### Faker 源码 https://github.com/joke2k/faker
 ## 环境准备
  ```
