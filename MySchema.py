@@ -4,14 +4,14 @@ import time
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, sessionmaker
-from sqlalchemy import Column, String, Integer, Text, ForeignKey, Table, DateTime, FLOAT, Text,Time
+from sqlalchemy import Column, String, Integer, Text, ForeignKey, Table, DateTime, FLOAT, Text,Time,Date
 import random
 from faker import Faker
 faker = Faker(locale='zh_CN')
 
 from config import DB_URL
 
-database = 'iot_db'
+database = 'iot_db2'
 engine = create_engine(DB_URL.format(database))
 Base = declarative_base()
 
@@ -340,6 +340,19 @@ class CameraInfo(Base):
     def __repr__(self):
         return '%s(%r)' % (self.__class__.__name__, self.name)
 
+
+
+class PigPrice(Base):
+
+    __tablename__ = 'PigPrices'
+
+    id = Column(Integer, primary_key=True,index=True)
+    省份 = Column(String(10))
+    外三元 =  Column(FLOAT)
+    内三元 =  Column(FLOAT)
+    土杂猪 =  Column(FLOAT)
+    日期 = Column(Date, nullable=False)
+
 def fake_iot_data(session,sum_company=1,sum_user=10,sum_animal=1000,sum_sensors=30,sum_cameras=100,first=False):
 
     companies = [Company(       # 构建公司信息
@@ -560,5 +573,5 @@ if __name__ == '__main__':
         print("total_company:{}".format(total_company))
         print("completed :{}".format(i))
 
-        fake_iot_data(session,sum_user=sum_user,sum_animal=sum_animal,sum_sensors=sum_sensors,sum_cameras=sum_cameras,first=True)
+        # fake_iot_data(session,sum_user=sum_user,sum_animal=sum_animal,sum_sensors=sum_sensors,sum_cameras=sum_cameras,first=True)
 
