@@ -36,7 +36,7 @@ class TestHandler(BaseHTTPRequestHandler):
 
     def do_GET(self):
         # This should match the payload in test_http_notification
-        self.server.received.append({'test.py':'GET request'})
+        self.server.received.append({'jobManager.py':'GET request'})
 
     def do_POST(self):
         self.handle_payload()
@@ -46,14 +46,14 @@ class TestHandler(BaseHTTPRequestHandler):
 
     def do_DELETE(self):
         # This should match the payload in test_http_notification
-        self.server.received.append({'test.py':'DELETE request'})
+        self.server.received.append({'jobManager.py':'DELETE request'})
 
 
 class SchedulerTest(unittest.TestCase):
     def setUp(self):
         self.maxDiff = None
         self.test_client = TestClient()
-        self.test_engine = SchedulerEngine(self.test_client, 'test.py')
+        self.test_engine = SchedulerEngine(self.test_client, 'jobManager.py')
         self.schedule_events = []
 
     def tearDown(self):
@@ -156,7 +156,7 @@ class SchedulerTest(unittest.TestCase):
         del self.test_engine
         del self.test_client
         self.test_client = TestClient()
-        self.test_engine = SchedulerEngine(self.test_client, 'test.py')
+        self.test_engine = SchedulerEngine(self.test_client, 'jobManager.py')
         for event in schedule_events:
             if 'last_run' in event:
                 del event['last_run']
@@ -187,7 +187,7 @@ class SchedulerTest(unittest.TestCase):
         time.sleep(20)
         print('Starting scheduler, time is {}'.format(datetime.datetime.utcnow()))
         self.test_client = TestClient()
-        self.test_engine = SchedulerEngine(self.test_client, 'test.py')
+        self.test_engine = SchedulerEngine(self.test_client, 'jobManager.py')
         self.check_schedules_run(self.schedule_events)
 
     def test_concurrent_updates(self):
@@ -230,16 +230,16 @@ class SchedulerTest(unittest.TestCase):
         threading.Thread(target=self.start_http_server, daemon=True).start()
         now = datetime.datetime.strftime(datetime.datetime.utcnow(), '%Y-%m-%dT%H:%M:%S.%fZ')
         schedule_events = [{'id':'http_1', 'title':'date_get_job', 'actions':['date_job_action'],
-                            'http_push':{'url':'http://localhost:8000', 'method':'GET', 'headers':{'Content-Type':'application/json'}, 'payload':{'test.py': 'GET request'}},
+                            'http_push':{'url':'http://localhost:8000', 'method':'GET', 'headers':{'Content-Type':'application/json'}, 'payload':{'jobManager.py': 'GET request'}},
                             'config':{'type':'date', 'start_date':now}},
                            {'id':'http_2', 'title':'date_post_job', 'actions':['date_job_action'],
-                            'http_push':{'url':'http://localhost:8000', 'method':'POST', 'headers':{'Content-Type':'application/json'}, 'payload':{'test.py': 'POST request'}},
+                            'http_push':{'url':'http://localhost:8000', 'method':'POST', 'headers':{'Content-Type':'application/json'}, 'payload':{'jobManager.py': 'POST request'}},
                             'config':{'type':'date', 'start_date':now}},
                            {'id':'http_3', 'title':'date_put_job', 'actions':['date_job_action'],
-                            'http_push':{'url':'http://localhost:8000', 'method':'PUT', 'headers':{'Content-Type':'application/json'}, 'payload':{'test.py': 'PUT request'}},
+                            'http_push':{'url':'http://localhost:8000', 'method':'PUT', 'headers':{'Content-Type':'application/json'}, 'payload':{'jobManager.py': 'PUT request'}},
                             'config':{'type':'date', 'start_date':now}},
                            {'id':'http_4', 'title':'date_delete_job', 'actions':['date_job_action'],
-                            'http_push':{'url':'http://localhost:8000', 'method':'DELETE', 'headers':{'Content-Type':'application/json'}, 'payload':{'test.py': 'DELETE request'}},
+                            'http_push':{'url':'http://localhost:8000', 'method':'DELETE', 'headers':{'Content-Type':'application/json'}, 'payload':{'jobManager.py': 'DELETE request'}},
                             'config':{'type':'date', 'start_date':now}}]
         self.add_schedules(schedule_events)
         self.check_schedules_added(schedule_events)

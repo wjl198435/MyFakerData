@@ -7,12 +7,18 @@ import threading
 import time
 import unittest
 import logging
+from functools import partial
 _LOGGER = logging.getLogger(__name__)
+
+import sys
+sys.path.append("..")
 
 from logger import  error, exception, info, logJson, setDebug, warn,setInfo
 
 from scheduler import SchedulerEngine
 
+# import doJob.crawlPrice
+from jobs.crawlPigPrice import getPigPrice
 
 def job(message='stuff'):
     print("I'm working on:", message)
@@ -24,7 +30,10 @@ class Client():
 
     def RunAction(self, action):
         info('RunAction:' + action)
-        job()
+        eval(action)()
+        # action()
+        # partial(action)
+        # job()
         # self.actions_ran.append(action)
         # info(self.actions_ran)
         return True
@@ -71,10 +80,12 @@ class TestScheduler():
 
     def test_concurrent_updates(self):
         now = datetime.datetime.strftime(datetime.datetime.utcnow(), '%Y-%m-%dT%H:%M:%S.%fZ')
+        # now = datetime.datetime.strftime(datetime.datetime.now(), '%Y-%m-%dT%H:%M:%S.%fZ')
         schedule_events = [
             # {'id':'concurrent_1', 'title':'date_job', 'actions':['job'], 'config':{'type':'interval', 'start_date':now}},
-            {'id':'concurrent_10', 'title':'date_job_updated', 'actions':['test.job'], 'config':{'type':'interval','unit':'seconds', 'interval':3,'start_date':now}},
-            # {'id':'concurrent_2', 'title':'daily_job', 'actions':['daily_job_action'], 'config':{'type':'interval', 'unit':'day', 'interval':1, 'start_date':now}},
+            # {'id':'concurrent_10', 'title':'seconds_job_updated', 'actions':['job'], 'config':{'type':'interval','unit':'second', 'interval':3,'start_date':now}},
+            {'id':'concurrent_11', 'title':'getPigPrice', 'actions':['getPigPrice'], 'config':{'type':'interval','unit':'day', 'interval':1,'start_date':now}},
+            # {'id':'concurrent_20', 'title':'minutes_job_updated', 'actions':['job'], 'config':{'type':'interval','unit':'minute', 'interval':1,'start_date':now}},
             # {'id':'concurrent_20', 'title':'daily_job_updated', 'actions':['daily_job_action'], 'config':{'type':'interval', 'unit':'day', 'interval':1, 'start_date':now}},
             # {'id':'concurrent_3', 'title':'weekly_job', 'actions':['weekly_job_action'], 'config':{'type':'interval', 'unit':'week', 'interval':1, 'start_date':now}},
             # {'id':'concurrent_30', 'title':'weekly_job_updated', 'actions':['weekly_job_action'], 'config':{'type':'interval', 'unit':'week', 'interval':1, 'start_date':now}},

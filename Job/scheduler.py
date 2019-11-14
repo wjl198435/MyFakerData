@@ -183,7 +183,7 @@ class SchedulerEngine(Thread):
                         schedule_item['job'] = schedule.every(config['interval'], config['start_date']).hours
                     if config['unit'] == 'minute':
                         schedule_item['job'] = schedule.every(config['interval'], config['start_date']).minutes
-                    if config['unit'] == 'seconds':
+                    if config['unit'] == 'second':
                         schedule_item['job'] = schedule.every(config['interval'], config['start_date']).seconds
                     if config['unit'] == 'day':
                         schedule_item['job'] = schedule.every(config['interval'], config['start_date']).days.at(config['start_date'])

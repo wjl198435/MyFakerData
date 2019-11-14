@@ -9,7 +9,7 @@ Inspired by Addam Wiggins' article "Rethinking Cron" [1] and the
 Features:
     - A simple to use API for scheduling jobs.
     - Very lightweight and no external dependencies.
-    - Excellent test.py coverage.
+    - Excellent jobManager.py coverage.
     - Works with Python 2.7 and 3.3
 Usage:
     >>> import schedule

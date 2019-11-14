@@ -11,8 +11,8 @@ faker = Faker(locale='zh_CN')
 
 from config import DB_URL
 
-database = 'iot_db2'
-engine = create_engine(DB_URL.format(database))
+# database = 'iot_db2'
+engine = create_engine(DB_URL)
 Base = declarative_base()
 
 class User(Base):
@@ -546,6 +546,20 @@ def fake_iot_data(session,sum_company=1,sum_user=10,sum_animal=1000,sum_sensors=
     print("{}:完成sensorinfos->sensorinfos:{} ".format(time.time(),sum_sensors))
 
     session.commit()
+
+
+class DBManager(object):
+    def __init__(self):
+        Session = sessionmaker(bind=engine)
+        self.session = Session()
+
+    def InsertOne(self,data):
+        self.session.add(data)
+        self.session.commit()
+
+    def InsertAll(self,datas):
+        self.session.add_all(datas)
+        self.session.commit()
 
 if __name__ == '__main__':
     Base.metadata.create_all(engine)

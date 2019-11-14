@@ -2,20 +2,15 @@
 import re
 import urllib.request
 import ssl
-
-# from sqlalchemy import create_engine
-# from sqlalchemy.ext.declarative import declarative_base
-# from sqlalchemy.orm import relationship, sessionmaker
-# from sqlalchemy import Column, String, Integer, Text, ForeignKey, Table, DateTime, FLOAT, Text,Time
 import urllib
-
+from datetime import datetime
 from bs4 import BeautifulSoup
 
-# from ..config import DB_URL
-#
-# database = 'iot_db'
-# engine = create_engine(DB_URL.format(database))
-# Base = declarative_base()
+import sys
+sys.path.append("../..")
+
+from config import PIG_PRICE_URL
+from dbManager import DBManager, PigPrice
 
 def getHtml(url):
     page = urllib.request.urlopen(url)
@@ -43,31 +38,73 @@ def parseTableHeader(table):
 
 def parseTableContent(table):
     tab = table
+    # province,waisanyuan_price,neisanyuan_price,tuzhazhu_price,date=0
+    province = []
+    waisanyuan_price = []
+    neisanyuan_price = []
+    tuzhazhu_price = []
+    date = []
     for tr in tab.findAll('tr'):
         data = tr.find_all('td')
         if len(data) >4:
-            val1 = data[0].find('a').text
-            num1 = data[1].text.split()[0]
-            num2 = data[2].text.split()[0]
-            num3 = data[3].text.split()[0]
-            num4 = data[4].text.split()[0]
-            print(val1,num1,num2,num3,num4)
+            province.append(data[0].find('a').text)
+            waisanyuan_price.append(data[1].text.split()[0])
+            neisanyuan_price.append(data[2].text.split()[0])
+            tuzhazhu_price.append(data[3].text.split()[0])
+            date.append(data[4].text.split()[0])
+    # print(province,waisanyuan_price,neisanyuan_price,tuzhazhu_price,date)
+    return  province,waisanyuan_price,neisanyuan_price,tuzhazhu_price,date
 
+def writeToDB(datas):
+    province,waisanyuan_price,neisanyuan_price,tuzhazhu_price,date = datas
+    pigPrice=[]
+    # print(province)
+    # print(waisanyuan_price)
+    for i in range(0, len(province)):
+        print(i, province[i])
+        pp = PigPrice(
+            省份 = province[i],
+            外三元 = waisanyuan_price[i],
+            内三元 = neisanyuan_price[i],
+            土杂猪 = tuzhazhu_price[i],
+            日期 = datetime.strptime(date[i], '%Y-%m-%d')
+        )
+        print(datetime.strptime(date[i], '%Y-%m-%d'))
+        pigPrice.append(pp)
+    dbm =  DBManager()
+    dbm.InsertAll(pigPrice)
+        # print(i, province[i]）
+    # PigPrice(
+    # 省份 = 11,
+    # 外三元 = 22 ,
+    # 内三元 = 112 ,
+    # 土杂猪 = 22 ,
+    # 日期 = 22,
+    # )
 
-if __name__ == '__main__':
+def getPigPrice():
+
     ssl._create_default_https_context = ssl._create_unverified_context
-    URL =  "http://www.dongbao120.com/jinrizhujia/"
+    URL =  PIG_PRICE_URL
     soup = getHtml(URL)
     tables=getTables(soup)
 
     parseTableHeader(tables[1])
-    parseTableContent(tables[1])
+    datas = parseTableContent(tables[1])
+    writeToDB(datas)
 
-    Base.metadata.create_all(engine)
-    Session = sessionmaker(bind=engine)
-    session = Session()
+if __name__ == '__main__':
+    getPigPrice()
+    # ssl._create_default_https_context = ssl._create_unverified_context
+    # URL =  "http://www.dongbao120.com/jinrizhujia/"
+    # soup = getHtml(URL)
+    # tables=getTables(soup)
+    #
+    # parseTableHeader(tables[1])
+    # datas = parseTableContent(tables[1])
+    # writeToDB(datas)
 
-    session.commit()
+
 
 
 
@@ -85,10 +122,10 @@ if __name__ == '__main__':
 #         num3 = data[3].text.split()[0]
 #         num4 = data[4].text.split()[0]
 #         print(val1,num1,num2,num3,num4)
-    # for td in tr.findAll('td'):
+# for td in tr.findAll('td'):
 
 
-        # print(td.getText())
+# print(td.getText())
 
 
 

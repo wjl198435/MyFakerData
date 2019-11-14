@@ -5,7 +5,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, sessionmaker
 from sqlalchemy import Column, String, Integer, Text, ForeignKey, Table, DateTime, FLOAT, Text,Time
 import random
-from MySchema import Company
+from dbManager import Company
 
 from config import DB_URL
 from city2lnglat import address2latlng
