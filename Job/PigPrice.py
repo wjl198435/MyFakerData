@@ -3,48 +3,19 @@ import re
 import urllib.request
 import ssl
 
-
+# from sqlalchemy import create_engine
+# from sqlalchemy.ext.declarative import declarative_base
+# from sqlalchemy.orm import relationship, sessionmaker
+# from sqlalchemy import Column, String, Integer, Text, ForeignKey, Table, DateTime, FLOAT, Text,Time
 import urllib
 
 from bs4 import BeautifulSoup
 
-# def getHtml(url):
-#     page = urllib.request.urlopen(url)
-#     html = page.read()
-#     html = html.decode('utf-8')
-#     return html
+# from ..config import DB_URL
 #
-#
-# def getImg(html):
-#     reg = r'<p class="img_title">(.*)</p>'
-#     img_title = re.compile(reg)
-#     imglist = re.findall(img_title, html)
-#     return imglist
-#
-#
-#
-# def getPrice(html):
-#     reg = r'<a href="https://jiage.cngold.org/farm/pig.html" target="_blank" title="猪肉报价" class="fruit-red" id="JO_111819q63">(.*)</a>'
-#     img_title = re.compile(reg)
-#     pricelist = re.findall(img_title, html)
-#     return pricelist
-#
-# ssl._create_default_https_context = ssl._create_unverified_context
-# url = "http://www.dongbao120.com/jinrizhujia/"
-# html = getHtml(url)
-# print(html)
-# priceList = getPrice(html)
-
-# print(priceList)
-
-
-
-# ssl._create_default_https_context = ssl._create_unverified_context
-# URL =  "http://www.dongbao120.com/jinrizhujia/"
-# page = urllib.request.urlopen(URL)
-# soup = BeautifulSoup(page)
-# page.close()
-
+# database = 'iot_db'
+# engine = create_engine(DB_URL.format(database))
+# Base = declarative_base()
 
 def getHtml(url):
     page = urllib.request.urlopen(url)
@@ -82,6 +53,7 @@ def parseTableContent(table):
             num4 = data[4].text.split()[0]
             print(val1,num1,num2,num3,num4)
 
+
 if __name__ == '__main__':
     ssl._create_default_https_context = ssl._create_unverified_context
     URL =  "http://www.dongbao120.com/jinrizhujia/"
@@ -89,8 +61,13 @@ if __name__ == '__main__':
     tables=getTables(soup)
 
     parseTableHeader(tables[1])
-
     parseTableContent(tables[1])
+
+    Base.metadata.create_all(engine)
+    Session = sessionmaker(bind=engine)
+    session = Session()
+
+    session.commit()
 
 
 
