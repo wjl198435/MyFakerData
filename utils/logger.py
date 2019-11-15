@@ -1,13 +1,13 @@
 from logging import Formatter, getLogger, StreamHandler, WARN, INFO, DEBUG
-from logging.handlers import TimedRotatingFileHandler,MemoryHandler, RotatingFileHandler
+from logging.handlers import TimedRotatingFileHandler
 from inspect import getouterframes, currentframe, getargvalues
 from traceback import extract_stack
 import tarfile
-from os import path, getpid, remove
+from os import path, remove
 from datetime import datetime
 from hashlib import sha256
 import time
-from threadpool import ThreadPool
+from utils.threadpool import ThreadPool
 from glob import iglob
 
 MAX_JSON_ITEMS_PER_CATEGORY = 100

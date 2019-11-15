@@ -6,13 +6,10 @@ from time import sleep
 
 import schedule as schedule
 
+import sys
+sys.path.append("..")
 
-
-# import . as schedule
-# from myDevices.requests_futures.sessions import FuturesSession
-from logger import  error, exception, info, logJson, setDebug, warn
-
-
+from utils.logger import exception, info, logJson
 
 
 class SchedulerEngine(Thread):

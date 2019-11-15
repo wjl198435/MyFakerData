@@ -2,7 +2,7 @@
 This module provides a singleton thread pool class
 """
 from concurrent.futures import ThreadPoolExecutor
-from singleton import Singleton
+from utils.singleton import Singleton
 
 executor = ThreadPoolExecutor(max_workers=4)
 class ThreadPool(Singleton):

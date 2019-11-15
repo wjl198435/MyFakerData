@@ -1,24 +1,20 @@
 import datetime
-from http.server import HTTPServer, BaseHTTPRequestHandler
-import json
-import pdb
-import sqlite3
 import threading
 import time
-import unittest
 import logging
-from functools import partial
+
 _LOGGER = logging.getLogger(__name__)
 
 import sys
 sys.path.append("..")
 
-from logger import  error, exception, info, logJson, setDebug, warn,setInfo
+from utils.logger import info, setInfo
 
 from scheduler import SchedulerEngine
+from Tasks.crawlPigPrice import getPigPrice
+
 
 # import doJob.crawlPrice
-from jobs.crawlPigPrice import getPigPrice
 
 def job(message='stuff'):
     print("I'm working on:", message)

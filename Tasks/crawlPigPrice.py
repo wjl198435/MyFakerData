@@ -7,10 +7,14 @@ from datetime import datetime
 from bs4 import BeautifulSoup
 
 import sys
-sys.path.append("../..")
+sys.path.append("..")
+
+# import sys
+# sys.path.append("../..")
 
 from config import PIG_PRICE_URL
-from dbManager import DBManager, PigPrice
+from DBManager.createTables import  PigPrice
+from DBManager.dbManager import DBManager
 
 def getHtml(url):
     page = urllib.request.urlopen(url)
