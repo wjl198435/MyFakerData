@@ -19,6 +19,8 @@ from Tasks.crawlPigPrice import getPigPrice
 def job(message='stuff'):
     print("I'm working on:", message)
 
+
+
 class Client():
     def __init__(self):
         info('TestClient init')
@@ -78,9 +80,13 @@ class TestScheduler():
         now = datetime.datetime.strftime(datetime.datetime.utcnow(), '%Y-%m-%dT%H:%M:%S.%fZ')
         # now = datetime.datetime.strftime(datetime.datetime.now(), '%Y-%m-%dT%H:%M:%S.%fZ')
         schedule_events = [
+            {'id':'getPigPrice', 'title':'getPigPrice', 'actions':['getPigPrice'], 'config':{'type':'interval','unit':'day', 'interval':1,'start_date':now}},
+            {'id':'testSeconds', 'title':'test_seconds', 'actions':['job'], 'config':{'type':'interval','unit':'second', 'interval':1,'start_date':now}},
+
+
             # {'id':'concurrent_1', 'title':'date_job', 'actions':['job'], 'config':{'type':'interval', 'start_date':now}},
             # {'id':'concurrent_10', 'title':'seconds_job_updated', 'actions':['job'], 'config':{'type':'interval','unit':'second', 'interval':3,'start_date':now}},
-            {'id':'concurrent_11', 'title':'getPigPrice', 'actions':['getPigPrice'], 'config':{'type':'interval','unit':'day', 'interval':1,'start_date':now}},
+
             # {'id':'concurrent_20', 'title':'minutes_job_updated', 'actions':['job'], 'config':{'type':'interval','unit':'minute', 'interval':1,'start_date':now}},
             # {'id':'concurrent_20', 'title':'daily_job_updated', 'actions':['daily_job_action'], 'config':{'type':'interval', 'unit':'day', 'interval':1, 'start_date':now}},
             # {'id':'concurrent_3', 'title':'weekly_job', 'actions':['weekly_job_action'], 'config':{'type':'interval', 'unit':'week', 'interval':1, 'start_date':now}},
