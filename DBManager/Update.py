@@ -7,7 +7,7 @@ import sys
 sys.path.append("..")
 
 import random
-from createTables import Company
+from createTables import Company,AnimalInfo
 
 from config import DB_URL
 from utils.city2lnglat import address2latlng
@@ -15,98 +15,34 @@ from utils.city2lnglat import address2latlng
 database = 'iot_db2'
 engine = create_engine(DB_URL.format(database))
 
-if __name__ == '__main__':
+# Session = sessionmaker(bind=engine)
+# session = Session()
+
+def update_latlng_from_address():
+
+    # 三张表关联 SELECT * FROM (表1 INNER JOIN 表2 ON 表1.字段号=表2.字段号) INNER JOIN 表3 ON 表1.字段号=表3.字段号
+    # SELECT * FROM (animals INNER JOIN companies ON animals.`company_id`=companies.id) INNER JOIN animalinfos ON animals.`animalinfo_id`=animalinfos.id where animals.id<100  limit 100
     Session = sessionmaker(bind=engine)
     session = Session()
-    for com in session.query(Company):
-        result = address2latlng(com.province)
-        # print(result)
-        if result['status'] ==0:
-            lng = result["result"]["location"]["lng"]
-            lat = result["result"]["location"]["lat"]
-            print(lng,lat)
-            com.lat = lat
-            com.lon = lng
-
+    print("update_latlng_from_address")
+    for animalinfo in session.query(AnimalInfo).filter(AnimalInfo.id <1000):
+        print(animalinfo.address)
+        result = address2latlng(animalinfo.address)
+        print(result)
+        # print(ani.address)
     session.commit()
-        # print(address2latlng(com.city))
-        # print(type(result))
-        #
-        # if result["status"] == 0:
-        #     print(result["result"]["location"])
 
+if __name__ == '__main__':
 
-        # print(com)
-    # with session.begin():
-    #     a = session.query(Company).get(10)
-    #     print(a)
-
-
-
-
-#     /* CREATE TABLE `worldmap_latlng` (
-#         `id` int(11) NOT NULL AUTO_INCREMENT,
-#                               `lat` FLOAT NOT NULL,
-#                                               `lng` FLOAT NOT NULL,
-#                                                               `name` VARCHAR(20) NOT NULL,
-#                                                                                      `value` FLOAT NOT NULL,
-#                                                                                                        `timestamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-#                                                                                                                                                                           PRIMARY KEY (`id`)
-#     ) AUTO_INCREMENT=7 DEFAULT CHARSET=latin1;
-# */
-#
-# /* INSERT INTO `worldmap_latlng`
-# (`lat`,
-#  `lng`,
-#  `name`,
-#  `value`,
-#  `timestamp`)
-# VALUES
-# (39.234,
-#  116.3234,
-#  'Beijing',
-#  1.0,
-#  now()); */
-#
-# /* INSERT INTO `worldmap_latlng`
-# (`lat`,
-#  `lng`,
-#  `name`,
-#  `value`,
-#  `timestamp`)
-# VALUES
-# (34.234,
-#  121.3234,
-#  'Shanghai',
-#  3.0,
-#  now()); */
-#
-# /* INSERT INTO  `worldmap_latlng`
-# (`lat`,
-#  `lng`,
-#  `name`,
-#  `value`,
-#  `timestamp`)
-# VALUES
-# (39.234,
-#  121.3234,
-#  'Tianjing',
-#  5.23,
-#  now()); */
-# /*
-# SELECT
-# `scale` as value,
-# `lat` as latitude,
-# `lon` as longitude,
-# `city` as name
-# FROM companies */
-#
-#
-# SELECT
-# `scale` as value,
-# `lat` as latitude,
-# `lon` as longitude,
-# `province` as name
-# FROM companies
-# group by  `province`
-# order by value ASC
+    update_latlng_from_address()
+    # for com in session.query(Company):
+    #     result = address2latlng(com.province)
+    #     # print(result)
+    #     if result['status'] ==0:
+    #         lng = result["result"]["location"]["lng"]
+    #         lat = result["result"]["location"]["lat"]
+    #         print(lng,lat)
+    #         com.lat = lat
+    #         com.lon = lng
+    #
+    # session.commit()

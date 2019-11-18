@@ -3,6 +3,8 @@ import threading
 import time
 import logging
 
+from datetime import  timedelta
+
 _LOGGER = logging.getLogger(__name__)
 
 import sys
@@ -77,11 +79,14 @@ class TestScheduler():
         self.test_engine.stop()
 
     def test_concurrent_updates(self):
-        now = datetime.datetime.strftime(datetime.datetime.utcnow(), '%Y-%m-%dT%H:%M:%S.%fZ')
+        # now = datetime.datetime.strftime(datetime.datetime.utcnow(), '%Y-%m-%dT%H:%M:%S.%fZ')
         # now = datetime.datetime.strftime(datetime.datetime.now(), '%Y-%m-%dT%H:%M:%S.%fZ')
+        # now = datetime.datetime.strftime(datetime.datetime.now(), '%Y-%m-%dT%H:%M:%S.%fZ')
+        start_get_pig_price_time_job = datetime.datetime.utcnow() - datetime.timedelta(hours=6)
+        start_get_pig_price_time_job =  datetime.datetime.strftime(start_get_pig_price_time_job,'%Y-%m-%dT%H:%M:%S.%fZ')
         schedule_events = [
-            {'id':'getPigPrice', 'title':'getPigPrice', 'actions':['getPigPrice'], 'config':{'type':'interval','unit':'day', 'interval':1,'start_date':now}},
-            {'id':'testSeconds', 'title':'test_seconds', 'actions':['job'], 'config':{'type':'interval','unit':'second', 'interval':1,'start_date':now}},
+            {'id':'getPigPrice', 'title':'getPigPrice', 'actions':['getPigPrice'], 'config':{'type':'interval','unit':'day', 'interval':1,'start_date':start_get_pig_price_time_job}},
+            {'id':'testSeconds', 'title':'test_seconds', 'actions':['job'], 'config':{'type':'interval','unit':'second', 'interval':10,'start_date':now}},
 
 
             # {'id':'concurrent_1', 'title':'date_job', 'actions':['job'], 'config':{'type':'interval', 'start_date':now}},
@@ -107,4 +112,9 @@ class TestScheduler():
 if __name__ == '__main__':
     setInfo()
     ts = TestScheduler()
+    now = datetime.datetime.strftime(datetime.datetime.utcnow(), '%Y-%m-%dT%H:%M:%S.%fZ')
+
     ts.test_concurrent_updates()
+
+    # now = datetime.datetime.strftime(datetime.datetime.now(), '%Y-%m-%dT%H:%M:%S.%fZ')
+    # print(now)

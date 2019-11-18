@@ -1,6 +1,8 @@
 ### 参考教程 influx-mqqt  https://segmentfault.com/a/1190000012514865
 ### sqlalchemy https://www.cnblogs.com/mrchige/p/6389588.html
 ### Faker 源码 https://github.com/joke2k/faker
+
+### https://www.runoob.com/python3/python-mysql-connector.html
 ## 环境准备
  ```
  conda activate homeassistant
@@ -11,6 +13,8 @@
 
  conda acitvate homeassistant
  conda install -n homeassistant paho-mqtt
+
+ pip install mysql-connector
 ```
 ## influx
 

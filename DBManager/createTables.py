@@ -218,6 +218,7 @@ class AnimalInfo(Base):
     health_rate = Column(Integer)  # 健康等级
     health_status = Column(String(6)) # 健康状态
     action_status = Column(String(6))  #当前行为状态
+    time  =  Column(DateTime, nullable=False)
 
 
 
