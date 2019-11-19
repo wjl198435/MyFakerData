@@ -1,6 +1,12 @@
-# MQTTHOST = "192.168.8.102"
-# MQTTPORT = 1883
-#
+__version__ = '2.0.3'
+
+MQTT_BROKER = "192.168.8.102"
+MQTT_PORT = 1883
+MQTT_CLIENT_ID = "demo_wd"
+MQTT_USER = "demo"
+MQTT_PSW = "demo"
+MQTT_PROTOCOL = "3.1"
+
 
 DB_USER = 'hass'
 DB_PSD = 'hass'

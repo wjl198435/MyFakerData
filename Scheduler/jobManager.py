@@ -14,6 +14,7 @@ from utils.logger import info, setInfo
 
 from scheduler import SchedulerEngine
 from Tasks.crawlPigPrice import getPigPrice
+from cloud.client import SendSystemInfo
 
 
 # import doJob.crawlPrice
@@ -46,7 +47,7 @@ class TestScheduler():
     def __init__(self):
         self.maxDiff = None
         self.test_client = Client()
-        self.test_engine = SchedulerEngine(self.test_client, 'test')
+        self.test_engine = SchedulerEngine(self.test_client, 'cayennemqtt_test.py')
         self.schedule_events = []
 
     def remove_schedules(self, engine=None):

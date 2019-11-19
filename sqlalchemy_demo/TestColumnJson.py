@@ -24,7 +24,7 @@ class UserJson(Base):
 
 database = 'iot_db'
 engine = create_engine(DB_URL.format(database))
-# engine = create_engine('postgresql://test:newpass@localhost:5432/test')
+# engine = create_engine('postgresql://cayennemqtt_test.py:newpass@localhost:5432/cayennemqtt_test.py')
 
 from sqlalchemy.orm import sessionmaker
 

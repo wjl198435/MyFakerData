@@ -4,10 +4,12 @@ from sqlite3 import connect
 from threading import RLock, Thread
 from time import sleep
 
-import schedule as schedule
-
 import sys
 sys.path.append("..")
+
+import Scheduler.schedule as schedule
+
+
 
 from utils.logger import exception, info, logJson
 

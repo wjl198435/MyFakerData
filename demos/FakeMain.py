@@ -38,7 +38,7 @@ import time
 
 # def main():
 #     on_mqtt_connect()
-#     # on_publish("/test/server", "Hello Python!", 1)
+#     # on_publish("/cayennemqtt_test.py/server", "Hello Python!", 1)
 #     # on_publish("sensors/".format(), "Hello Python!", 1)
 #     # on_subscribe()
 #     while True:
