@@ -1,5 +1,6 @@
 ### 参考教程 influx-mqqt  https://segmentfault.com/a/1190000012514865
 ### sqlalchemy https://www.cnblogs.com/mrchige/p/6389588.html
+    https://www.cnblogs.com/goldsunshine/p/9269880.html
 ### Faker 源码 https://github.com/joke2k/faker
 
 ### https://www.runoob.com/python3/python-mysql-connector.html
@@ -42,3 +43,7 @@ for i in range(sum_sensors):
 ## 基于conda faker sqlalchemy 生产模拟数据，并基于mqtt 进行发送
 
 
+## mysql 导出数据库表结构:
+```
+mysqldump -hlocalhost -uroot -proot -d iot_db2  > iot_db2.sql
+```

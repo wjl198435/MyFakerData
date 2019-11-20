@@ -1,4 +1,8 @@
 # coding=utf-8
+
+import sys
+sys.path.append("..")
+
 import datetime
 import time
 from sqlalchemy import create_engine
@@ -121,6 +125,10 @@ class Company(Base):
     # scopes_id = Column(Integer, ForeignKey('companies.id'))
     scopes = relationship('Scope', secondary='company_scope', backref='companies')
     animals = relationship('Animal', backref='producer')   # 拥有产品
+
+    sensors = relationship('Sensor', backref='own_sensor')   # 拥有传感器
+    cameras = relationship('Camera', backref='own_camera')   # 拥有摄像头
+
     # scope = relationship('Scope', secondary='company_scope', backref='scopes')  # 营业范围
     # work = relationship('User', backref='work')
 
@@ -265,6 +273,8 @@ class Sensor(Base):
     last_updated = Column(DateTime)  #最后更新时间
     created = Column(DateTime)     # 创建时间
 
+    company_id = Column(Integer, ForeignKey('companies.id'))
+
     sensorinfo_id = Column(Integer, ForeignKey('sensorinfos.id'))
     sensorinfo = relationship('SensorInfo', backref='sensorinfo', uselist=False)
 
@@ -308,6 +318,8 @@ class Camera(Base):
     last_changed = Column(DateTime)  #最后改变时间
     last_updated = Column(DateTime)  #最后更新时间
     created = Column(DateTime)     # 创建时间
+
+    company_id = Column(Integer, ForeignKey('companies.id'))
 
     camerainfo_id = Column(Integer, ForeignKey('camerainfos.id'))
     camerainfo = relationship('CameraInfo', backref='camerainfo', uselist=False)
@@ -555,6 +567,8 @@ def getSession():
     return session
 
 if __name__ == '__main__':
+
+
     Base.metadata.create_all(engine)
     Session = sessionmaker(bind=engine)
     session = Session()
@@ -582,3 +596,4 @@ if __name__ == '__main__':
 
         # fake_iot_data(session,sum_user=sum_user,sum_animal=sum_animal,sum_sensors=sum_sensors,sum_cameras=sum_cameras,first=True)
 
+    session.close()
