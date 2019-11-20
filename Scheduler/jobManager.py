@@ -14,7 +14,7 @@ from utils.logger import info, setInfo
 
 from scheduler import SchedulerEngine
 from Tasks.crawlPigPrice import getPigPrice
-from cloud.client import SendSystemInfo
+
 
 
 # import doJob.crawlPrice
@@ -83,11 +83,31 @@ class TestScheduler():
         # now = datetime.datetime.strftime(datetime.datetime.utcnow(), '%Y-%m-%dT%H:%M:%S.%fZ')
         # now = datetime.datetime.strftime(datetime.datetime.now(), '%Y-%m-%dT%H:%M:%S.%fZ')
         # now = datetime.datetime.strftime(datetime.datetime.now(), '%Y-%m-%dT%H:%M:%S.%fZ')
-        start_get_pig_price_time_job = datetime.datetime.utcnow() - datetime.timedelta(hours=6)
-        start_get_pig_price_time_job =  datetime.datetime.strftime(start_get_pig_price_time_job,'%Y-%m-%dT%H:%M:%S.%fZ')
+
+        # 获取现在时间
+        now_time = datetime.datetime.utcnow()
+        # 获取明天时间
+        next_time = now_time + datetime.timedelta(days=+1)
+        next_year = next_time.date().year
+        next_month = next_time.date().month
+        next_day = next_time.date().day
+        # 获取明天3点时间
+        next_time = datetime.datetime.strptime(str(next_year)+"-"+str(next_month)+"-"+str(next_day)+" 00:00:00", "%Y-%m-%d %H:%M:%S")
+
+
+
+        info("utcnow:"+str(datetime.datetime.utcnow()))
+
+        info("next_time: "+str(next_time))
+
+        #
+        # info(datetime.datetime.utcnow()-datetime.timedelta(hours=6))
+        #
+        # start_get_pig_price_time_job = datetime.datetime.utcnow() - datetime.timedelta(hours=6)
+        price_job_every_day_at3am =  datetime.datetime.strftime(next_time,'%Y-%m-%dT%H:%M:%S.%fZ')
         schedule_events = [
-            {'id':'getPigPrice', 'title':'getPigPrice', 'actions':['getPigPrice'], 'config':{'type':'interval','unit':'day', 'interval':1,'start_date':start_get_pig_price_time_job}},
-            {'id':'testSeconds', 'title':'test_seconds', 'actions':['job'], 'config':{'type':'interval','unit':'second', 'interval':10,'start_date':now}},
+            {'id':'getPigPrice', 'title':'getPigPrice', 'actions':['job'], 'config':{'type':'interval','unit':'day', 'interval':1,'start_date':price_job_every_day_at3am}},
+            # {'id':'testSeconds', 'title':'test_seconds', 'actions':['job'], 'config':{'type':'interval','unit':'second', 'interval':10,'start_date':now}},
 
 
             # {'id':'concurrent_1', 'title':'date_job', 'actions':['job'], 'config':{'type':'interval', 'start_date':now}},

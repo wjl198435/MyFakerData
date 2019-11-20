@@ -15,6 +15,16 @@
 #
 ############################################################################
 
+"""
+mosquitto_pub -h 192.168.8.102 -p 1883 -t "homeassistant/binary_sensor/garden/config" -m '{"name": "garden10", "device_class": "motion", "state_topic": "homeassistant/binary_sensor/garden/state"}'
+
+mosquitto_pub -h 192.168.8.102 -p 1883 -t "homeassistant/sensor/sensorBedroomT/config" -m '{"device_class": "temperature", "name": "Temperature_mqtt", "state_topic": "homeassistant/sensor/sensorBedroom/state", "unit_of_measurement": "°C", "value_template": "{{ value_json.temperature}}" }'
+
+mosquitto_pub -h 192.168.8.102 -p 1883 -t "homeassistant/sensor/sensorBedroomH/config" -m '{"device_class": "humidity", "name": "Humidity_mqtt","state_topic": "homeassistant/sensor/sensorBedroom/state", "unit_of_measurement": "%", "value_template": "{{ value_json.humidity}}" }'
+
+mosquitto_pub -h 192.168.8.102 -p 1883 -t "homeassistant/sensor/sensorBedroom/state" -m '{ "temperature": 23.20, "humidity": 43.70 }'
+
+"""
 import paho.mqtt.client as mqtt
 import sys, time
 
@@ -30,6 +40,7 @@ run=True
 def on_message_test(client, obj, msg):
     global count, run
     print ("MESSAGE: "+msg.topic+" "+str(msg.qos)+" "+str(msg.payload))
+    print(client)
     count = count+1
     if count < 10:
         print(count)
@@ -49,12 +60,12 @@ def on_subscribe(client, obj, mid, qos):
 def on_connect(client, userdata, flags, rc):
     global count
     print ("client connected")
-    client.subscribe("test1", qos=1)
+    client.subscribe("test2", qos=1)
     client.publish(topic='test', payload='hello world!! %d' % count , qos=1, retain=False )
 
 client = mqtt.Client( 'paho-mqtt-test' )
 
-client.message_callback_add( "test1", on_message_test )
+client.message_callback_add( "test2", on_message_test )
 
 client.on_message   = on_message
 client.on_publish   = on_publish
