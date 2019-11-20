@@ -106,7 +106,7 @@ class TestScheduler():
         # start_get_pig_price_time_job = datetime.datetime.utcnow() - datetime.timedelta(hours=6)
         price_job_every_day_at3am =  datetime.datetime.strftime(next_time,'%Y-%m-%dT%H:%M:%S.%fZ')
         schedule_events = [
-            {'id':'getPigPrice', 'title':'getPigPrice', 'actions':['job'], 'config':{'type':'interval','unit':'day', 'interval':1,'start_date':price_job_every_day_at3am}},
+            {'id':'getPigPrice', 'title':'getPigPrice', 'actions':['getPigPrice'], 'config':{'type':'interval','unit':'day', 'interval':1,'start_date':price_job_every_day_at3am}},
             # {'id':'testSeconds', 'title':'test_seconds', 'actions':['job'], 'config':{'type':'interval','unit':'second', 'interval':10,'start_date':now}},
 
 
