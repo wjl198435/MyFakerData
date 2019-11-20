@@ -28,6 +28,8 @@ import cloud.cayennemqtt as cayennemqtt
 GENERAL_SLEEP_THREAD = 0.20
 
 
+
+
 class WriterThread(Thread):
     """Class for sending messages to the server on a thread"""
 
@@ -44,10 +46,12 @@ class WriterThread(Thread):
         index = 0
         while self.Continue:
 
-            debug('WriterThread run')
-            self.cloudClient.mqttClient.publish_packet("topic", "message index:"+str(index))
+            # debug('WriterThread run')
+            # self.cloudClient.mqttClient.publish_packet("topic", "message index:"+str(index))
             index +=1
-            print("message index:"+str(index))
+            # print("message index:"+str(index))
+            self.cloudClient.EnqueuePacket("{},index={}".format(self.cloudClient.get_scheduled_events(),str(index)))
+
             try:
                 if self.cloudClient.exiting.wait(GENERAL_SLEEP_THREAD):
                     return
@@ -118,10 +122,13 @@ class CloudServerClient:
         self.clientId = self.config.get('Agent', 'ClientID', None)
         self.connected = False
         self.exiting = Event()
+        self.schedulerEngine = None
+
 
     def __del__(self):
         """Delete the client"""
         self.Destroy()
+
 
     def Start(self):
         if not self.Connect():
@@ -137,6 +144,10 @@ class CloudServerClient:
         self.schedulerEngine = SchedulerEngine(self, 'client_scheduler')
         events = self.schedulerEngine.get_scheduled_events()
         self.EnqueuePacket(events, cayennemqtt.JOBS_TOPIC)
+    def get_scheduled_events(self):
+        self.schedulerEngine = SchedulerEngine(self, 'client_scheduler')
+        events = self.schedulerEngine.get_scheduled_events()
+        return events
 
     def OnMessage(self, message):
         pass
