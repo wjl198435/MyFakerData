@@ -21,7 +21,7 @@ from DBManager.dbManager import DBManager
 
 class PigPrice(object):
 
-    def __init__(self,url):
+    def __init__(self,url=PIG_PRICE_URL):
         """Initialize processor thread"""
         debug('ProcessorThread init')
         self._url = url

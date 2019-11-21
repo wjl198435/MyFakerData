@@ -25,7 +25,7 @@ from utils.subprocess import executeCommand
 from cloud.apiclient import CayenneApiClient
 import cloud.cayennemqtt as cayennemqtt
 from config import MQTT_BROKER,MQTT_PORT,MQTT_USER,MQTT_PSW,MQTT_CLIENT_ID
-from Tasks.SchedulerManager import SchedulerManager
+from Tasks.TasksManager import SchedulerManager
 from DBManager.CrawlPigPrice import get_pig_price
 
 GENERAL_SLEEP_THREAD = 0.20
@@ -161,8 +161,6 @@ class CloudServerClient:
         self.Destroy()
 
 
-
-
     def Start(self):
         if not self.Connect():
             error('Error starting agent')
@@ -183,12 +181,6 @@ class CloudServerClient:
 
         SchedulerManager(self)
 
-
-
-    def get_scheduled_events(self):
-        self.schedulerEngine = SchedulerEngine(self, 'client_scheduler')
-        events = self.schedulerEngine.get_scheduled_events()
-        return events
 
     def OnMessage(self, message):
         """Add message from the server to the queue"""
@@ -260,6 +252,8 @@ class CloudServerClient:
         ThreadPool.Shutdown()
         self.Disconnect()
         info('Client shut down')
+
+
 
     def RunAction(self, action):
         info('RunAction:' + action)
