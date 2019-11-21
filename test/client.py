@@ -24,11 +24,37 @@ from utils.subprocess import executeCommand
 # from hashlib import sha256
 from cloud.apiclient import CayenneApiClient
 import cloud.cayennemqtt as cayennemqtt
+from config import MQTT_BROKER,MQTT_PORT,MQTT_USER,MQTT_PSW,MQTT_CLIENT_ID
 
 GENERAL_SLEEP_THREAD = 0.20
 
 
+class ProcessorThread(Thread):
+    """Class for processing messages from the server on a thread"""
 
+    def __init__(self, name, client):
+        """Initialize processor thread"""
+        debug('ProcessorThread init')
+        Thread.__init__(self, name=name)
+        self.cloudClient = client
+        self.Continue = True
+
+    def run(self):
+        """Process messages from the server until the thread is stopped"""
+        debug('ProcessorThread run,  continue: ' + str(self.Continue))
+        while self.Continue:
+            try:
+                if self.cloudClient.exiting.wait(GENERAL_SLEEP_THREAD):
+                    return
+                self.cloudClient.ProcessMessage()
+            except:
+                exception("ProcessorThread Unexpected error")
+        return
+
+    def stop(self):
+        """Stop processing messages from the server"""
+        debug('ProcessorThread stop')
+        self.Continue = False
 
 class WriterThread(Thread):
     """Class for sending messages to the server on a thread"""
@@ -48,9 +74,9 @@ class WriterThread(Thread):
 
             # debug('WriterThread run')
             # self.cloudClient.mqttClient.publish_packet("topic", "message index:"+str(index))
-            index +=1
-            # print("message index:"+str(index))
-            self.cloudClient.EnqueuePacket("{},index={}".format(self.cloudClient.get_scheduled_events(),str(index)))
+            # index +=1
+            # # print("message index:"+str(index))
+            # self.cloudClient.EnqueuePacket("{},index={}".format(self.cloudClient.get_scheduled_events(),str(index)))
 
             try:
                 if self.cloudClient.exiting.wait(GENERAL_SLEEP_THREAD):
@@ -58,6 +84,8 @@ class WriterThread(Thread):
                 if self.cloudClient.mqttClient.connected == False:
                     info('WriterThread mqttClient not connected')
                     continue
+
+
                 got_packet = False
                 topic, message = self.cloudClient.DequeuePacket()
                 if topic or message:
@@ -130,10 +158,14 @@ class CloudServerClient:
         self.Destroy()
 
 
+
+
     def Start(self):
         if not self.Connect():
             error('Error starting agent')
             return
+
+
 
         self.readQueue = Queue()
         self.writeQueue = Queue()
@@ -141,16 +173,26 @@ class CloudServerClient:
         self.writerThread = WriterThread('writer', self)
         self.writerThread.start()
 
+        self.processorThread = ProcessorThread('processor', self)
+        self.processorThread.start()
+
         self.schedulerEngine = SchedulerEngine(self, 'client_scheduler')
         events = self.schedulerEngine.get_scheduled_events()
         self.EnqueuePacket(events, cayennemqtt.JOBS_TOPIC)
+
+
+
     def get_scheduled_events(self):
         self.schedulerEngine = SchedulerEngine(self, 'client_scheduler')
         events = self.schedulerEngine.get_scheduled_events()
         return events
 
     def OnMessage(self, message):
-        pass
+        """Add message from the server to the queue"""
+        info('OnMessage: {}'.format(message))
+        self.readQueue.put(message)
+
+
     def Connect(self):
         """Connect to the server"""
         self.connected = False
@@ -216,7 +258,37 @@ class CloudServerClient:
         self.Disconnect()
         info('Client shut down')
 
+
+    def ProcessMessage(self):
+        """Process a message from the server"""
+        try:
+            messageObject = self.readQueue.get(False)
+            if not messageObject:
+                return False
+        except Empty:
+            return False
+
+        info(messageObject)
+        # self.ExecuteMessage(messageObject)
+
+
+def on_message_test(client, obj, msg):
+
+    print ("MESSAGE: "+msg.topic+" "+str(msg.qos)+" "+str(msg.payload))
+
 if __name__ == '__main__':
     setDebug()
-    client = CloudServerClient("192.168.8.102",1883,"192.168.8.102")
+    client = CloudServerClient(MQTT_BROKER,MQTT_PORT,"192.168.8.102")
     client.Start()
+
+    while client.mqttClient.connected is False:
+        pass
+
+    if client.mqttClient.connected == True:
+        info("MQTT Client connect is success!------------")
+        # client.mqttClient.client.subscribe("test", True)
+        topic = "test2019"
+        client.mqttClient.client.subscribe("test", True)
+        client.mqttClient.client.subscribe(topic,True)
+        # client.mqttClient.client.publish(topic='test', payload='hello world!! ' , qos=1, retain=False )
+        client.mqttClient.client.message_callback_add(topic, on_message_test )
