@@ -3,35 +3,67 @@
 import sys
 sys.path.append("..")
 from config import DB_USER ,DB_PSD ,DB_HOST, DB_DATABASE ,DB_CHARSET
-from config import IOT_BIG_DATA_USER ,IOT_BIG_DATA_PSD ,IOT_BIG_DATA_HOST,IOT_BIG_DATA_DATABASE ,IOT_BIG_DATA_CHARSET
+from config import BIG_DATA_USER ,BIG_DATA_PSD ,BIG_DATA_HOST,BIG_DATA_DATABASE ,BIG_DATA_CHARSET,BD_DATA_URL
 import mysql.connector
 
 from utils.logger import info, setInfo,error
 import traceback
 
+import datetime
+import time
+import datetime
+from sqlalchemy import create_engine
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import relationship, sessionmaker
+from sqlalchemy import Column, String, Integer, ForeignKey, Table, DateTime, FLOAT, Text,Time,Date
+
+Base = declarative_base()
+engine = create_engine(BD_DATA_URL)
 
 iot_bg_db = mysql.connector.connect(
-    host=IOT_BIG_DATA_HOST,
-    user=IOT_BIG_DATA_USER,
-    passwd=IOT_BIG_DATA_PSD,
-    database=IOT_BIG_DATA_DATABASE,
+    host=BIG_DATA_HOST,
+    user=BIG_DATA_USER,
+    passwd=BIG_DATA_PSD,
 )
 
 # 创建数据库
 mycursor = iot_bg_db.cursor()
-mycursor.execute("CREATE DATABASE If Not Exists "+ IOT_BIG_DATA_DATABASE)
+mycursor.execute("CREATE DATABASE If Not Exists "+ BIG_DATA_DATABASE)
+mycursor.execute("use "+BIG_DATA_DATABASE)
 
+class PigPriceTable(Base):
 
-# 创建表
-# mydb = mysql.connector.connect(
-#     host=IOT_BIG_DATA_HOST,
-#     user=IOT_BIG_DATA_USER,
-#     passwd=IOT_BIG_DATA_PSD,
-#     database=IOT_BIG_DATA_DATABASE,
-# )
-#
-# # 创建数据库
-# mycursor = mydb.cursor()
+    __tablename__ = 'PigPriceTable'
+
+    id = Column(Integer, primary_key=True,index=True)
+    省份 = Column(String(10))
+    外三元 =  Column(FLOAT)
+    内三元 =  Column(FLOAT)
+    土杂猪 =  Column(FLOAT)
+    日期 = Column(Date, nullable=False)
+    time = Column(DateTime, nullable=False,default=datetime.datetime.utcnow,onupdate=datetime.datetime.utcnow)
+
+class PigsLiveTable(Base):
+    __tablename__ = 'PigsLiveTable'
+    id = Column(Integer, primary_key=True,index=True)
+    total = Column(Integer)
+    time = Column(DateTime, nullable=False,default=datetime.datetime.utcnow,onupdate=datetime.datetime.utcnow)
+
+class PigsDeedTable(Base):
+    __tablename__ = 'PigsDeedTable'
+    id = Column(Integer, primary_key=True,index=True)
+    total = Column(Integer)
+    time = Column(DateTime, nullable=False,default=datetime.datetime.now(),onupdate=datetime.datetime.utcnow)
+    lat =  Column(FLOAT)
+    lon =Column(FLOAT)
+    province = Column(String(10))
+    company = Column(String(50))
+    company_id = Column(Integer)
+
+def getBigDataBaseSession():
+    Session = sessionmaker(bind=engine)
+    session = Session()
+    return session
 
 def create_pigs_live_tables():
     mycursor.execute("CREATE TABLE If Not Exists  pigs_live(id BIGINT  AUTO_INCREMENT PRIMARY KEY,total BIGINT, time  DATETIME)")
@@ -98,10 +130,50 @@ def count_pigs_deed_map():
 
     iot_bg_db.commit()
 
+def create_pigs_deed_geo():
+    ## 计数历史全量 死亡地理分布数据
+    mycursor.execute("CREATE TABLE If Not Exists  pigs_deed_geo(id BIGINT AUTO_INCREMENT PRIMARY KEY,total BIGINT,lat FLOAT,lon FLOAT,province VARCHAR(10), time  DATETIME)")
+    iot_bg_db.commit()
+
+def create_pigs_deed_table():
+    mycursor.execute("CREATE TABLE If Not Exists  pigs_deed(id BIGINT AUTO_INCREMENT PRIMARY KEY,total BIGINT, time  DATETIME)")
+    iot_bg_db.commit()
+def create_pigs_live_table():
+    mycursor.execute("CREATE TABLE If Not Exists  pigs_live(id BIGINT  AUTO_INCREMENT PRIMARY KEY,total BIGINT, time  DATETIME)")
+    iot_bg_db.commit()
+def create_pig_price_table():
+    mycursor.execute("CREATE TABLE If Not Exists  pig_price(id BIGINT  AUTO_INCREMENT PRIMARY KEY,省份 VARCHAR(10), 外三元 FLOAT,内三元 FLOAT,土杂猪 FLOAT,日期 DATE ,time  DATETIME  NOT NULL DEFAULT '2019-00-00 00:00:00' ON UPDATE current_timestamp())")
+    iot_bg_db.commit()
+
+def create_database(database_name):
+    mycursor.execute("CREATE DATABASE If Not Exists "+ database_name )
+
+def create_bg_tables(database_name):
+    try:
+        create_database(database_name)
+        create_pig_price_table()
+        create_pigs_live_table()
+        create_pigs_deed_table()
+        create_pigs_deed_geo()
+        iot_bg_db.close()
+    except Exception as e:
+        error(count_pig_deed_map_sql)
+        error(str(e))
+
 if __name__ == '__main__':
     setInfo()
-    count_pigs_deed_map()
-    iot_bg_db.close()
+    Base.metadata.create_all(engine)
+    Session = sessionmaker(bind=engine)
+    session = Session()
+    session.commit()
+    session.close()
+    # create_bg_tables(BIG_DATA_DATABASE)
+
+    # create_pigs_live_table()
+
+    # count_pigs_deed_map()
+
+
 
 
 

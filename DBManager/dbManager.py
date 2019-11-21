@@ -2,17 +2,17 @@ import sys
 sys.path.append("..")
 
 # from createTables import getSession
-from DBManager.createTables import getSession
+# from DBManager.createIOTables import getIotDataBaseSession
 
 class DBManager(object):
-    def __init__(self):
+    def __init__(self,session):
         # Session = sessionmaker(bind=engine)
-        self.session = getSession()
+        self._session = session
 
     def InsertOne(self,data):
-        self.session.add(data)
-        self.session.commit()
+        self._session.add(data)
+        self._session.commit()
 
     def InsertAll(self,datas):
-        self.session.add_all(datas)
-        self.session.commit()
+        self._session.add_all(datas)
+        self._session.commit()

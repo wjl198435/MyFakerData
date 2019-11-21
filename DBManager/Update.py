@@ -8,7 +8,7 @@ import sys
 sys.path.append("..")
 
 import random
-from createTables import Company,AnimalInfo,Sensor,Camera
+from createIOTables import Company,AnimalInfo,Sensor,Camera
 
 from config import DB_URL
 from utils.city2lnglat import address2latlng

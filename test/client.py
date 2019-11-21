@@ -25,8 +25,11 @@ from utils.subprocess import executeCommand
 from cloud.apiclient import CayenneApiClient
 import cloud.cayennemqtt as cayennemqtt
 from config import MQTT_BROKER,MQTT_PORT,MQTT_USER,MQTT_PSW,MQTT_CLIENT_ID
+from Tasks.SchedulerManager import SchedulerManager
+from DBManager.CrawlPigPrice import get_pig_price
 
 GENERAL_SLEEP_THREAD = 0.20
+
 
 
 class ProcessorThread(Thread):
@@ -165,8 +168,6 @@ class CloudServerClient:
             error('Error starting agent')
             return
 
-
-
         self.readQueue = Queue()
         self.writeQueue = Queue()
 
@@ -179,6 +180,8 @@ class CloudServerClient:
         self.schedulerEngine = SchedulerEngine(self, 'client_scheduler')
         events = self.schedulerEngine.get_scheduled_events()
         self.EnqueuePacket(events, cayennemqtt.JOBS_TOPIC)
+
+        SchedulerManager(self)
 
 
 
@@ -258,6 +261,24 @@ class CloudServerClient:
         self.Disconnect()
         info('Client shut down')
 
+    def RunAction(self, action):
+        info('RunAction:' + action)
+        eval(action)()
+        # action()
+        # partial(action)
+        # job()
+        # self.actions_ran.append(action)
+        # info(self.actions_ran)
+        return True
+
+    # def RunAction(self, action):
+    #     """Run a specified action"""
+    #     debug('RunAction: {}'.format(action))
+    #     # result = True
+    #     # command = action.copy()
+    #     # self.mqttClient.transform_command(command)
+    #     # result = self.ExecuteMessage(command)
+    #     # return result
 
     def ProcessMessage(self):
         """Process a message from the server"""
@@ -283,8 +304,6 @@ if __name__ == '__main__':
 
     while client.mqttClient.connected is False:
         pass
-
-
 
     if client.mqttClient.connected == True:
         info("MQTT Client connect is success!------------")

@@ -19,12 +19,14 @@ DB_HOST = '172.29.46.236'
 DB_DATABASE =  "iot_db2"
 DB_CHARSET = "utf8"
 
-IOT_BIG_DATA_USER = 'hass'
-IOT_BIG_DATA_PSD = 'hass'
-IOT_BIG_DATA_HOST = DB_HOST
-IOT_BIG_DATA_DATABASE = 'iot_big_data_db'
-IOT_BIG_DATA_CHARSET = 'utf8'
+BIG_DATA_USER = 'hass'
+BIG_DATA_PSD = 'hass'
+BIG_DATA_HOST = DB_HOST
+BIG_DATA_DATABASE = 'iot_big_data_db_test'
+BIG_DATA_CHARSET = 'utf8'
 
-DB_URL ='mysql+pymysql://'+DB_USER+':'+DB_PSD+'@'+DB_HOST+'/'+DB_DATABASE+'?charset='+DB_CHARSET
+DB_URL = 'mysql+pymysql://'+DB_USER+':'+DB_PSD+'@'+DB_HOST+'/'+DB_DATABASE+'?charset='+DB_CHARSET
+
+BD_DATA_URL = 'mysql+pymysql://'+BIG_DATA_USER+':'+BIG_DATA_PSD+'@'+BIG_DATA_HOST+'/'+BIG_DATA_DATABASE+'?charset='+DB_CHARSET
 
 PIG_PRICE_URL = "http://www.dongbao120.com/jinrizhujia/"

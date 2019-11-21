@@ -105,6 +105,7 @@ class Company(Base):
 
     id = Column(Integer, primary_key=True,index=True)
     name = Column(String(64))  # 公司名
+    english_name = Column(String(64)) #公司英文名
     corporate =  Column(String(64),nullable=False, index=True)  # 法人
 
     scale = Column(Integer)  # 养殖现规模
@@ -128,6 +129,7 @@ class Company(Base):
 
     sensors = relationship('Sensor', backref='own_sensor')   # 拥有传感器
     cameras = relationship('Camera', backref='own_camera')   # 拥有摄像头
+    time = Column(DateTime, nullable=False,default=datetime.datetime.now(),onupdate=datetime.datetime.utcnow)
 
     # scope = relationship('Scope', secondary='company_scope', backref='scopes')  # 营业范围
     # work = relationship('User', backref='work')
@@ -189,6 +191,7 @@ class Animal(Base):
 
     animalinfo_id = Column(Integer, ForeignKey('animalinfos.id'))
     animalinfo = relationship('AnimalInfo', backref='animalinfo', uselist=False)
+    time = Column(DateTime, nullable=False,default=datetime.datetime.now(),onupdate=datetime.datetime.utcnow)
 
 Animal_Sex = ["公","母"]
 Sick_times = [0,0,0,0,0,0,0,0,0,0,0,1,1,1,2,2,3,4,5,6,7]
@@ -226,7 +229,7 @@ class AnimalInfo(Base):
     health_rate = Column(Integer)  # 健康等级
     health_status = Column(String(6)) # 健康状态
     action_status = Column(String(6))  #当前行为状态
-    time  =  Column(DateTime, nullable=False)
+    time = Column(DateTime, nullable=False,default=datetime.datetime.now(),onupdate=datetime.datetime.utcnow)
 
 
 
@@ -355,16 +358,7 @@ class CameraInfo(Base):
 
 
 
-class PigPrice(Base):
 
-    __tablename__ = 'PigPrices'
-
-    id = Column(Integer, primary_key=True,index=True)
-    省份 = Column(String(10))
-    外三元 =  Column(FLOAT)
-    内三元 =  Column(FLOAT)
-    土杂猪 =  Column(FLOAT)
-    日期 = Column(Date, nullable=False)
 
 def fake_iot_data(session,sum_company=1,sum_user=10,sum_animal=1000,sum_sensors=30,sum_cameras=100,first=False):
 
@@ -561,7 +555,7 @@ def fake_iot_data(session,sum_company=1,sum_user=10,sum_animal=1000,sum_sensors=
     session.commit()
 
 
-def getSession():
+def getIotDataBaseSession():
     Session = sessionmaker(bind=engine)
     session = Session()
     return session
