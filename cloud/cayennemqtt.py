@@ -120,7 +120,8 @@ class CayenneMQTTClient:
         hostname is the MQTT broker hostname.
         port is the MQTT broker port.
         """
-        self.root_topic = 'v1/{}/things/{}'.format(username, clientid)
+        # self.root_topic = 'v1/{}/things/{}'.format(username, clientid)
+        self.root_topic = 'homeassistant'
         self.client = mqtt.Client(client_id=clientid, clean_session=True, userdata=self)
         self.client.on_connect = self.connect_callback
         self.client.on_disconnect = self.disconnect_callback
@@ -156,8 +157,14 @@ class CayenneMQTTClient:
             self.connected = True
             # Subscribing in on_connect() means that if we lose the connection and
             # reconnect then subscriptions will be renewed.
+            print(self.get_topic_string(COMMAND_TOPIC, True))
+            print(self.get_topic_string(COMMAND_JSON_TOPIC, False))
             client.subscribe(self.get_topic_string(COMMAND_TOPIC, True))
             client.subscribe(self.get_topic_string(COMMAND_JSON_TOPIC, False))
+
+
+            # client.subscribe("hello_mqtt", False,qos=1)
+
 
     def disconnect_callback(self, client, userdata, rc):
         """The callback for when the client disconnects from the server.

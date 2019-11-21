@@ -284,6 +284,8 @@ if __name__ == '__main__':
     while client.mqttClient.connected is False:
         pass
 
+
+
     if client.mqttClient.connected == True:
         info("MQTT Client connect is success!------------")
         # client.mqttClient.client.subscribe("test", True)
@@ -292,3 +294,9 @@ if __name__ == '__main__':
         client.mqttClient.client.subscribe(topic,True)
         # client.mqttClient.client.publish(topic='test', payload='hello world!! ' , qos=1, retain=False )
         client.mqttClient.client.message_callback_add(topic, on_message_test )
+
+        config_topic = "binary_sensor/jack11/jack11/config"
+        message = {"name": "garden88", "device_class": "motion", "state_topic": "homeassistant/binary_sensor/garden/state"}
+        client.EnqueuePacket( message, topic=config_topic)
+
+    # "homeassistant/binary_sensor/garden/config" -m '{"name": "garden10", "device_class": "motion", "state_topic": "homeassistant/binary_sensor/garden/state"}'

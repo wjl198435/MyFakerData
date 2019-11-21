@@ -86,8 +86,8 @@ def update_camera_company_id(Table):
 if __name__ == '__main__':
 
     # update_latlng_from_address()
-    # update_sensor_company_id(Sensor)
-    update_camera_company_id(Camera)
+    update_sensor_company_id(Sensor)
+    # update_camera_company_id(Camera)
     # print(random.choice(get_company_id()))
 
     session.close()

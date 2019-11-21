@@ -353,6 +353,7 @@ class CloudServerClient:
                 self.mqttClient.begin(self.username, self.password, self.clientId, self.HOST, self.PORT)
                 self.mqttClient.loop_start()
                 self.connected = True
+
             except OSError as oserror:
                 Daemon.OnFailure('cloud', oserror.errno)
                 error('Connect failed: ' + str(self.HOST) + ':' + str(self.PORT) + ' Error:' + str(oserror))
