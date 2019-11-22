@@ -1,23 +1,30 @@
-import paho.mqtt.client as mqtt
 import sys
 sys.path.append("..")
-from config import MQTTHOST, MQTTPORT
+from DBManager.createIOTables import getIotDataBaseSession,Sensor,Company,User,SensorInfo
+from utils.logger import info, setInfo,debug,setDebug
+class FakeMQSensors(object):
+    def __init__(self, serverclient = None,session = None,company_id = 6):
+        self.dbsession = session
+        self._company_id = company_id
 
 
-mqttClient = mqtt.Client()
-# 连接MQTT服务器
-def on_mqtt_connect():
-    mqttClient.connect(MQTTHOST, MQTTPORT, 60)
-    mqttClient.loop_start()
-# publish 消息
-def on_publish(topic, payload, qos):
-    print("on_publish")
-    mqttClient.publish(topic, payload, qos)
-# 消息处理函数
-def on_message_come(lient, userdata, msg):
-    print(msg.topic + " " + ":" + str(msg.payload))
-# subscribe 消息
-def on_subscribe():
-    print("on_publish")
-    mqttClient.subscribe("/server", 1)
-    mqttClient.on_message = on_message_come # 消息到来处理函数
+    def create_temperature_sensors(self):
+        sensors = self.dbsession.query(Sensor.domain,Sensor.unit,SensorInfo.mac).join(SensorInfo).filter(Sensor.company_id==str(self._company_id)).all()
+        users = self.dbsession.query(User.username,User.password).filter(User.company_id==str(self._company_id)).first()
+
+        # debug(sensors)
+        # debug(users)
+        # debug("sensors:"+str(len(sensors)))
+        # debug("users:"+str(len(users)))
+
+        for sensor in sensors:
+            debug(sensor)
+
+
+
+if __name__ == '__main__':
+    setDebug()
+    session = getIotDataBaseSession
+    MQSensors = FakeMQSensors(session=getIotDataBaseSession(),company_id=60)
+    MQSensors.create_temperature_sensors()
+

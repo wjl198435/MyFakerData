@@ -6,7 +6,7 @@ from config import DB_USER ,DB_PSD ,DB_HOST, DB_DATABASE ,DB_CHARSET
 from config import BIG_DATA_USER ,BIG_DATA_PSD ,BIG_DATA_HOST,BIG_DATA_DATABASE ,BIG_DATA_CHARSET,BD_DATA_URL
 import mysql.connector
 
-from utils.logger import info, setInfo,error
+from utils.logger import info, setInfo,error,debug,setDebug
 import traceback
 
 import datetime
@@ -19,6 +19,9 @@ from sqlalchemy import Column, String, Integer, ForeignKey, Table, DateTime, FLO
 
 Base = declarative_base()
 engine = create_engine(BD_DATA_URL)
+
+Session = sessionmaker(bind=engine)
+session = Session()
 
 iot_bg_db = mysql.connector.connect(
     host=BIG_DATA_HOST,
@@ -42,6 +45,24 @@ class PigPriceTable(Base):
     土杂猪 =  Column(FLOAT)
     日期 = Column(Date, nullable=False)
     time = Column(DateTime, nullable=False,default=datetime.datetime.utcnow,onupdate=datetime.datetime.utcnow)
+    def __repr__(self):
+        return '%s(%r) %s' % (self.__class__.__name__, self.日期,self.省份)
+
+def pigPriceIsExist(day):
+    sql = session.query(PigPriceTable).filter_by(日期 = str(day))
+    debug(sql)
+    result = sql.first()
+    if result is None:
+        return False
+    else:
+        return True
+
+def test_pig_price_latest_date():
+
+    # debug(datetime.date.today()- datetime.timedelta(days=+1))
+    today = datetime.date.today()- datetime.timedelta(days=1)
+    debug(today)
+    print(pigPriceIsExist(str(today)))
 
 class PigsLiveTable(Base):
     __tablename__ = 'PigsLiveTable'
@@ -67,6 +88,8 @@ def getBigDataBaseSession():
 
 def create_pigs_live_tables():
     mycursor.execute("CREATE TABLE If Not Exists  pigs_live(id BIGINT  AUTO_INCREMENT PRIMARY KEY,total BIGINT, time  DATETIME)")
+
+
 
 #exapmle: insert into  pigs_live(total,time)  (select count(*)  ,join_date  from iot_db2.animals where id <100)
 # select count(*)  ,date_format(join_date,'%Y-%m-%d') as jdate from iot_db2.animals join iot_db2.animalinfos on iot_db2.animalinfos.id = iot_db2.animals.id  where  iot_db2.animalinfos.health_status <>'死亡'
@@ -161,10 +184,11 @@ def create_bg_tables(database_name):
         error(str(e))
 
 if __name__ == '__main__':
-    setInfo()
+    setDebug()
     Base.metadata.create_all(engine)
     Session = sessionmaker(bind=engine)
     session = Session()
+    test_pig_price_latest_date()
     session.commit()
     session.close()
     # create_bg_tables(BIG_DATA_DATABASE)

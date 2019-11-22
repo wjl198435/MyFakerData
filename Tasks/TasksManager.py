@@ -9,7 +9,8 @@ from DBManager.CrawlPigPrice import PigPrice
 class SchedulerManager(object):
 
     def __init__(self, serverclient):
-        debug("SchedulerManager")
+        debug("SchedulerManager------------------")
+        debug(serverclient)
         self.cloudClient = serverclient
         self.schedulerEngine = SchedulerEngine(self, 'client_scheduler')
         self.add_events()
@@ -33,10 +34,11 @@ class SchedulerManager(object):
 
     def add_scheduled_event(self,event,insert=True):
         debug("add_scheduled_event")
-        self.schedulerEngine.add_scheduled_event(event, True)
+        self.schedulerEngine.add_scheduled_event(event, False)
 
     def get_events_task(self):
         events = self.schedulerEngine.get_scheduled_events()
+        self.cloudClient.EnqueuePacket(self.schedulerEngine.get_scheduled_events(),"test")
         print("get_events_task- events--->{}".format(events))
 
     def pig_price_task(self):
@@ -44,13 +46,13 @@ class SchedulerManager(object):
         pp.getPigPrice()
 
     def get_events(self):
-        info("get_events---------------")
+        debug("get_events---------------")
 
     def SendNotification(self, notification):
-        info('SendNotification: ' + notification)
+        debug('SendNotification: ' + notification)
 
     def RunAction(self, action):
-        info('RunAction:' + action)
+        debug('RunAction:' + action)
         eval(action)()
         # action()
         # partial(action)
@@ -70,7 +72,7 @@ class SchedulerManager(object):
         next_day = next_time.date().day
         # 获取明天3点时间
         next_time = datetime.datetime.strptime(str(next_year)+"-"+str(next_month)+"-"+str(next_day)+" 00:00:00", "%Y-%m-%d %H:%M:%S")
-        start_time = price_job_every_day_at3am =  datetime.datetime.strftime(next_time,'%Y-%m-%dT%H:%M:%S.%fZ')
+        start_time  =  datetime.datetime.strftime(next_time,'%Y-%m-%dT%H:%M:%S.%fZ')
 
-        pig_price_event = {'id':'getPigPrice', 'title':'self.pig_price_task', 'actions':['get_pig_price'], 'config':{'type':'interval','unit':'day', 'interval':1,'start_date':start_time}}
+        pig_price_event = {'id':'getPigPrice', 'title':'self.pig_price_task', 'actions':['get_pig_price'], 'config':{'type':'interval','unit':'hour', 'interval':1,'start_date':start_time}}
         return pig_price_event

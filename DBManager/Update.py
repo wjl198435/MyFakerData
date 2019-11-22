@@ -13,6 +13,9 @@ from createIOTables import Company,AnimalInfo,Sensor,Camera
 from config import DB_URL
 from utils.city2lnglat import address2latlng
 
+from faker import Faker
+faker = Faker(locale='zh_CN')
+
 database = 'iot_db2'
 engine = create_engine(DB_URL.format(database))
 
@@ -40,6 +43,15 @@ def get_company_id():
     for company in session.query(Company.id).all():
         companies_id.append(company.id)
     return  companies_id
+
+def update_company_english_name():
+
+    for company in session.query(Company):
+        print()
+        company.english_name = faker.user_name()
+
+    session.commit()
+
 
 def update_sensor_company_id(Table):
     i = 0
@@ -86,7 +98,8 @@ def update_camera_company_id(Table):
 if __name__ == '__main__':
 
     # update_latlng_from_address()
-    update_sensor_company_id(Sensor)
+    update_company_english_name()
+    # update_sensor_company_id(Sensor)
     # update_camera_company_id(Camera)
     # print(random.choice(get_company_id()))
 

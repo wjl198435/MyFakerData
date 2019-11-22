@@ -3,18 +3,22 @@ import re
 import urllib.request
 import ssl
 import urllib
-from datetime import datetime
+import datetime
+# from datetime import datetime
+# import datetime
+# import time
+
 from bs4 import BeautifulSoup
 
 import sys
 sys.path.append("..")
 
-from utils.logger import info, setInfo,error,debug
+from utils.logger import info, setInfo,error,debug,setDebug
 # import sys
 # sys.path.append("../..")
 
 from config import PIG_PRICE_URL
-from DBManager.createBigDataTables import PigPriceTable,getBigDataBaseSession
+from DBManager.createBigDataTables import PigPriceTable,getBigDataBaseSession,pigPriceIsExist
 from DBManager.createIOTables import getIotDataBaseSession
 from DBManager.dbManager import DBManager
 
@@ -34,8 +38,17 @@ class PigPrice(object):
 
         self.parseTableHeader(tables[1])
         datas = self.parseTableContent(tables[1])
-        print(datas)
-        self.writeToDB(datas)
+        day = datas[4]
+        # debug("getPigPrice :{}".format(day))
+
+        today = datetime.date.today()
+        if pigPriceIsExist(today):
+           info("Today  {} pig price is exist".format(today))
+            # self.writeToDB(datas)
+        else:
+            info("Today {} pig price is not exist , will insert to table".format(today))
+            self.writeToDB(datas)
+
 
     def writeToDB(self,datas):
         province,waisanyuan_price,neisanyuan_price,tuzhazhu_price,date = datas
@@ -49,9 +62,9 @@ class PigPrice(object):
                 外三元 = waisanyuan_price[i],
                 内三元 = neisanyuan_price[i],
                 土杂猪 = tuzhazhu_price[i],
-                日期 = datetime.strptime(date[i], '%Y-%m-%d')
+                日期 = datetime.datetime.strptime(date[i], '%Y-%m-%d')
             )
-            print(datetime.strptime(date[i], '%Y-%m-%d'))
+            print(datetime.datetime.strptime(date[i], '%Y-%m-%d'))
             pigPrice.append(pp)
         dbm =  DBManager(getBigDataBaseSession())
         dbm.InsertAll(pigPrice)
@@ -105,6 +118,7 @@ def get_pig_price():
     pp.getPigPrice()
 
 if __name__ == '__main__':
+    setDebug()
     pp=PigPrice(PIG_PRICE_URL)
     pp.getPigPrice()
     # getPigPrice()
