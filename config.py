@@ -8,6 +8,8 @@ MQTT_USER = "demo"
 MQTT_PSW = "demo"
 MQTT_PROTOCOL = "3.1"
 
+MQTT_DIS_PREFIX = "homeassistant"
+
 # 身份验证API
 ApiHost = MQTT_BROKER
 

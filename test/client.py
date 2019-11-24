@@ -26,7 +26,8 @@ from cloud.apiclient import CayenneApiClient
 import cloud.cayennemqtt as cayennemqtt
 from config import MQTT_BROKER,MQTT_PORT,MQTT_USER,MQTT_PSW,MQTT_CLIENT_ID
 from Tasks.TasksManager import SchedulerManager
-from DBManager.CrawlPigPrice import get_pig_price
+from Tasks.FakerMQTTSensors import FakeMQSensors
+
 
 GENERAL_SLEEP_THREAD = 0.20
 
@@ -180,6 +181,10 @@ class CloudServerClient:
         self.EnqueuePacket(events, cayennemqtt.JOBS_TOPIC)
 
         SchedulerManager(self)
+
+        FakeMQSensors(self,company_id=6)
+
+
 
 
     def OnMessage(self, message):

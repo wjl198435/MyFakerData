@@ -28,7 +28,7 @@ class SchedulerManager(object):
 
     def make_test_seconds_event(self):
         now = datetime.datetime.strftime(datetime.datetime.utcnow(), '%Y-%m-%dT%H:%M:%S.%fZ')
-        event = {'id':'testSeconds', 'title':'test_seconds', 'actions':['self.get_events_task'], 'config':{'type':'interval','unit':'second', 'interval':5,'start_date':now}}
+        event = {'id':'testSeconds', 'title':'test_seconds', 'actions':['self.get_events_task'], 'config':{'type':'interval','unit':'second', 'interval':60,'start_date':now}}
         return event
 
 
