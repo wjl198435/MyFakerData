@@ -20,6 +20,8 @@ class FakeMQSensors(object):
 
         self.schedulerEngine = SchedulerEngine(self, 'client_scheduler')
 
+        self.add_schedule_job()
+
     def do_faker_sensor(self):
         debug("do_faker_sensor")
 
