@@ -49,7 +49,7 @@ class FakeMQSensors(object):
         #
         # self.add_schedule_job()
 
-        # self.add_sensors()
+        self.add_sensors()
         TimerThread(self.do_faker_sensor,5, initial_delay=5)
 
 
@@ -64,21 +64,23 @@ class FakeMQSensors(object):
         self.get_sensors()
         # sub_sensors=np.random.choice(self.sensors,10,replace=False)
         # sub_sensors = random.choice(self.sensors)
+
         for i in range(10) :
             # debug("do_faker_sensor:{}".format(i))
             sensor =  random.choice(self.sensors)
             faker_sensor_topic = "sensor/{}/{}/state".format(sensor[-1],sensor.sn)
 
+            faker_sensor_message={"user":sensor[-1],"sn":sensor.sn,"domain":sensor.domain,"location":sensor[3]}
             if sensor.domain == "temperature":
-                faker_sensor_message = {"temperature" : round(random.uniform(10,40) ,1)}
+                faker_sensor_message["value"] = round(random.uniform(10,40) ,1)
             if sensor.domain == "humidity":
-                faker_sensor_message = {"temperature" : round(random.uniform(1,99) ,1)}
+                faker_sensor_message["value"] = round(random.uniform(1,99) ,1)
             if sensor.domain == "aqi":
-                faker_sensor_message = {"temperature": round(random.uniform(1,1999) ,1)}
+                faker_sensor_message["value"] = round(random.uniform(1,1999) ,1)
             if sensor.domain == "luminance":
-                faker_sensor_message = {"temperature" : round(random.uniform(1,49999) ,1)}
+                faker_sensor_message["value"] =  round(random.uniform(1,49999) ,1)
             if sensor.domain == "NH3":
-                faker_sensor_message = {"temperature" : round(random.uniform(1,999) ,1)}
+                faker_sensor_message["value"]  = round(random.uniform(1,999) ,1)
 
             self._serverclient.EnqueuePacket(faker_sensor_message ,faker_sensor_topic)
 
@@ -103,13 +105,14 @@ class FakeMQSensors(object):
         self.get_sensors()
         for sensor in self.sensors:
             sensor_topic = "sensor/{}/{}/config".format(sensor[-1],sensor.sn)
-            sensor_config={
+            sensor_config=\
+                {
                 "device_class": "temperature",
                 "name": str(sensor[3]+"_"+sensor.domain),
                 "state_topic": "{}/sensor/{}/{}/state".format(MQTT_DIS_PREFIX,sensor[-1],sensor.sn),
                 "unit_of_measurement": sensor.unit,
-                "value_template": "{{ value_json.temperature}}"
-                    }
+                "value_template": "{{ value_json.value}}"
+                }
             # message = {"name": "garden88", "device_class": "motion", "state_topic": "homeassistant/binary_sensor/garden/state"}
 
             debug("sensor_topic:{}".format(sensor_topic))
