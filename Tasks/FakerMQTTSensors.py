@@ -65,7 +65,7 @@ class FakeMQSensors(object):
         # sub_sensors=np.random.choice(self.sensors,10,replace=False)
         # sub_sensors = random.choice(self.sensors)
 
-        for i in range(10) :
+        for i in range(len(self.sensors)) :
             # debug("do_faker_sensor:{}".format(i))
             sensor =  random.choice(self.sensors)
             faker_sensor_topic = "sensor/{}/{}/state".format(sensor[-1],sensor.sn)
