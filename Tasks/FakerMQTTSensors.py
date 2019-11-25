@@ -15,7 +15,8 @@ class FakeMQSensors(object):
 
         while self._serverclient.mqttClient.connected is False:
             pass
-        self.add_temperature_sensors()
+
+        # self.add_temperature_sensors()
 
         self.schedulerEngine = SchedulerEngine(self, 'client_scheduler')
 
@@ -24,7 +25,7 @@ class FakeMQSensors(object):
 
     def add_schedule_job(self):
         now = datetime.datetime.strftime(datetime.datetime.utcnow(), '%Y-%m-%dT%H:%M:%S.%fZ')
-        event = {'id':'testSeconds', 'title':'faker_sensors_minute', 'actions':['self.do_faker_sensor'], 'config':{'type':'interval','unit':'minute', 'interval':5,'start_date':now}}
+        event = {'id':'faker_sensor', 'title':'faker_sensors_minute', 'actions':['self.do_faker_sensor'], 'config':{'type':'interval','unit':'minute', 'interval':5,'start_date':now}}
         self.schedulerEngine.add_scheduled_event(event, False)
         return event
      #/* select  concat('room', FLOOR(1 + (RAND() * 10))); */
