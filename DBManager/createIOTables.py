@@ -174,20 +174,21 @@ class Animal(Base):
     # name = Column(String(64), nullable=False, index=True)
     friendly_name = Column(String(64))
     sn = Column(String(18), nullable=False, index=True)  # 身份序列号
-    birthday = Column(DateTime, nullable=False)
-    join_date = Column(DateTime, nullable=False)
-    friendly_name = Column(String(64))
-    sex = Column(String(2))
-    weight = Column(FLOAT)
-    temperature = Column(FLOAT)
+    live = Column(String(64))   #饮食起居活动单元
+    birthday = Column(DateTime, nullable=False)  #生日
+    join_date = Column(DateTime, nullable=False) #加入日期
+    friendly_name = Column(String(64))    #花名
+    sex = Column(String(2))    #性别
+    weight = Column(FLOAT)    #体重
+    temperature = Column(FLOAT)  #温度
 
-    cate_id = Column(Integer, ForeignKey('categories.id'))
-    company_id = Column(Integer, ForeignKey('companies.id'))
+    cate_id = Column(Integer, ForeignKey('categories.id'))  #所属类别
+    company_id = Column(Integer, ForeignKey('companies.id')) #所属公司
 
-    camera_id = Column(Integer, ForeignKey('cameras.id'))
+    camera_id = Column(Integer, ForeignKey('cameras.id')) #所属摄像头
     camera = relationship('Camera', backref='camera')
 
-    keepers = relationship('User', secondary='animal_keeper', backref='keepers')
+    keepers = relationship('User', secondary='animal_keeper', backref='keepers') #饲养员
 
     animalinfo_id = Column(Integer, ForeignKey('animalinfos.id'))
     animalinfo = relationship('AnimalInfo', backref='animalinfo', uselist=False)
