@@ -209,7 +209,7 @@ class AnimalInfo(Base):
 
     id = Column(Integer, primary_key=True,index=True)
 
-    address = Column(String(64))  # 所属单元(那栋楼、那单元)
+    loc = Column(String(64))  # 所属单元(那栋楼、那单元)
     sick_times = Column(Integer)  # 生病次数
     total_sick_days = Column(Integer)  # 生病总天数
 
