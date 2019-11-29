@@ -8,7 +8,7 @@ import time
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, sessionmaker
-from sqlalchemy import Column, String, Integer, Text, ForeignKey, Table, DateTime, FLOAT, Text,Time,Date
+from sqlalchemy import Column, String, Integer, Text, ForeignKey, Table, DateTime, FLOAT, Text,Time,Date,TIMESTAMP
 import random
 from faker import Faker
 faker = Faker(locale='zh_CN')
@@ -59,7 +59,7 @@ class UserInfo(Base):
     qq = Column(String(11))
     phone = Column(String(11))
     # link = Column(String(64))
-    join_datetime = Column(DateTime,nullable=False)
+    join_datetime = Column(TIMESTAMP,nullable=False)
     # roles = Column(String(11))
 
     lat = Column(FLOAT)
@@ -129,7 +129,7 @@ class Company(Base):
 
     sensors = relationship('Sensor', backref='own_sensor')   # 拥有传感器
     cameras = relationship('Camera', backref='own_camera')   # 拥有摄像头
-    time = Column(DateTime, nullable=False,default=datetime.datetime.now(),onupdate=datetime.datetime.utcnow)
+    time = Column(TIMESTAMP, nullable=False,default=datetime.datetime.now(),onupdate=datetime.datetime.utcnow)
 
     # scope = relationship('Scope', secondary='company_scope', backref='scopes')  # 营业范围
     # work = relationship('User', backref='work')
@@ -175,8 +175,8 @@ class Animal(Base):
     friendly_name = Column(String(64))
     sn = Column(String(18), nullable=False, index=True)  # 身份序列号
     live = Column(String(64))   #饮食起居活动单元
-    birthday = Column(DateTime, nullable=False)  #生日
-    join_date = Column(DateTime, nullable=False) #加入日期
+    birthday = Column(TIMESTAMP, nullable=False)  #生日
+    join_date = Column(TIMESTAMP, nullable=False) #加入日期
     friendly_name = Column(String(64))    #花名
     sex = Column(String(2))    #性别
     weight = Column(FLOAT)    #体重
@@ -192,7 +192,7 @@ class Animal(Base):
 
     animalinfo_id = Column(Integer, ForeignKey('animalinfos.id'))
     animalinfo = relationship('AnimalInfo', backref='animalinfo', uselist=False)
-    time = Column(DateTime, nullable=False,default=datetime.datetime.now(),onupdate=datetime.datetime.utcnow)
+    time = Column(TIMESTAMP, nullable=False,default=datetime.datetime.now(),onupdate=datetime.datetime.utcnow)
 
 Animal_Sex = ["公","母"]
 Sick_times = [0,0,0,0,0,0,0,0,0,0,0,1,1,1,2,2,3,4,5,6,7]
@@ -230,7 +230,7 @@ class AnimalInfo(Base):
     health_rate = Column(Integer)  # 健康等级
     health_status = Column(String(6)) # 健康状态
     action_status = Column(String(6))  #当前行为状态
-    time = Column(DateTime, nullable=False,default=datetime.datetime.now(),onupdate=datetime.datetime.utcnow)
+    time = Column(TIMESTAMP, nullable=False,default=datetime.datetime.now(),onupdate=datetime.datetime.utcnow)
 
 
 
@@ -273,9 +273,9 @@ class Sensor(Base):
     state = Column(String(60))  # 当前状态
     attributes = Column(Text)  # 当前属性
 
-    last_changed = Column(DateTime)  #最后改变时间
-    last_updated = Column(DateTime)  #最后更新时间
-    created = Column(DateTime)     # 创建时间
+    last_changed = Column(TIMESTAMP)  #最后改变时间
+    last_updated = Column(TIMESTAMP)  #最后更新时间
+    created = Column(TIMESTAMP)     # 创建时间
 
     company_id = Column(Integer, ForeignKey('companies.id'))
 
@@ -319,9 +319,9 @@ class Camera(Base):
     state = Column(String(10))  # 当前状态
     attributes = Column(Text)  # 当前属性
 
-    last_changed = Column(DateTime)  #最后改变时间
-    last_updated = Column(DateTime)  #最后更新时间
-    created = Column(DateTime)     # 创建时间
+    last_changed = Column(TIMESTAMP)  #最后改变时间
+    last_updated = Column(TIMESTAMP)  #最后更新时间
+    created = Column(TIMESTAMP)     # 创建时间
 
     company_id = Column(Integer, ForeignKey('companies.id'))
 

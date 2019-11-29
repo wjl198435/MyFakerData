@@ -47,3 +47,10 @@ for i in range(sum_sensors):
 ```
 mysqldump -hlocalhost -uroot -proot -d iot_db2  > iot_db2.sql
 ```
+
+select
+$__timeGroupAlias(time,$__interval) ,
+count(animals.id)
+from animals 
+join animalinfos on `animals`.`animalinfo_id`= animalinfos.id 
+where company_id=${company_id} and health_status <> '死亡' and $__timeFilter(animalinfos.time)
