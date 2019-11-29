@@ -50,7 +50,7 @@ class FakeMQSensors(object):
         # self.add_schedule_job()
 
         # self.add_sensors()
-        TimerThread(self.do_faker_sensor,180, initial_delay=5)
+        TimerThread(self.do_faker_sensor,5, initial_delay=5)
 
 
     def RunAction(self, action):
@@ -72,7 +72,7 @@ class FakeMQSensors(object):
 
             faker_sensor_message={"user":sensor[-1],"sn":sensor.sn,"domain":sensor.domain,"location":sensor[3]}
             if sensor.domain == "temperature":
-                faker_sensor_message["value"] = round(random.uniform(10,40) ,1)
+                faker_sensor_message["value"] = round(random.uniform(-10,40) ,1)
             if sensor.domain == "humidity":
                 faker_sensor_message["value"] = round(random.uniform(1,99) ,1)
             if sensor.domain == "aqi":
@@ -98,7 +98,9 @@ class FakeMQSensors(object):
                 query(Sensor.domain,Sensor.sn,Sensor.unit,SensorInfo.loc,Company.english_name). \
                 join(SensorInfo).join(Company). \
                 filter(Sensor.company_id==str(self._company_id)). \
-                filter(Sensor.domain!='switch').filter(Sensor.domain!='fans').all()
+                filter(Sensor.domain!='switch').filter(Sensor.domain!='fans').order_by(Sensor.sn).all()
+                # filter(Sensor.domain!='switch').filter(Sensor.domain!='fans').order_by(Sensor.sn).limit(10).all()
+
 
 
     def add_sensors(self):

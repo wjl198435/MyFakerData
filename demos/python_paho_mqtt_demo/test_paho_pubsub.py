@@ -37,6 +37,18 @@ auth_pass = 'demo'
 count=1
 run=True
 
+test_topic = "homeassistant/sensor/qiangshen/8888888/state"
+
+message = {
+    "temperature": 25.8,
+    "sn": "8888888",
+    "humidity": 96.8,
+    "user": "test",
+    "location": "house1_room1_test",
+    "domain": "temperature",
+    "value": "25"
+}
+
 def on_message_test(client, obj, msg):
     global count, run
     print ("MESSAGE: "+msg.topic+" "+str(msg.qos)+" "+str(msg.payload))
@@ -60,12 +72,16 @@ def on_subscribe(client, obj, mid, qos):
 def on_connect(client, userdata, flags, rc):
     global count
     print ("client connected")
-    client.subscribe("test2", qos=1)
-    client.publish(topic='test', payload='hello world!! %d' % count , qos=1, retain=False )
+
+    client.subscribe(test_topic, qos=1)
+
+
+
+    client.publish(topic=test_topic, payload = message , qos=1, retain=False )
 
 client = mqtt.Client( 'paho-mqtt-test' )
 
-client.message_callback_add( "test2", on_message_test )
+client.message_callback_add( test_topic, on_message_test )
 
 client.on_message   = on_message
 client.on_publish   = on_publish
@@ -78,6 +94,7 @@ client.connect( mqtt_hostname, mqtt_port, 60 )
 try:
     while run:
         client.loop()
+        client.publish(topic=test_topic, payload = str(message) , qos=1, retain=False )
         time.sleep(0.5)
 
 except KeyboardInterrupt:
