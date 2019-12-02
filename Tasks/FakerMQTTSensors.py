@@ -86,7 +86,7 @@ class FakeMQSensors(object):
                 faker_sensor_message["value"] = round(random.uniform(1,99) ,1)
             if sensor.domain == "aqi":
                 faker_sensor_message["value"] = round(random.uniform(1,999) ,1)
-            if sensor.domain == "luminance":
+            if sensor.domain == "illuminance":
                 faker_sensor_message["value"] =  round(random.uniform(1,4999) ,1)
             if sensor.domain == "NH3":
                 faker_sensor_message["value"]  = round(random.uniform(1,999) ,1)
