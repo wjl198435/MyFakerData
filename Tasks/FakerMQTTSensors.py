@@ -113,6 +113,7 @@ class FakeMQSensors(object):
 
     def get_sensors_sql(self):
         sensors = self.dbsession.execute("select *  from `sensorinfos` join sensors on sensors.`sensorinfo_id`=`sensorinfos`.id where company_id=6 and loc REGEXP '^house1[_]'").fetchall()
+        self.sensors=sensors
         return sensors
 
     def add_sensors(sensor,company_english_name):
