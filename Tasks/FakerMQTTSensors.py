@@ -69,7 +69,8 @@ class FakeMQSensors(object):
 
     def do_faker_sensor_value(self):
         debug("do_faker_sensor")
-        self.get_sensors()
+        # self.get_sensors()
+        self.get_sensors_sql()
         # sub_sensors=np.random.choice(self.sensors,10,replace=False)
         # sub_sensors = random.choice(self.sensors)
 
@@ -110,7 +111,7 @@ class FakeMQSensors(object):
                 # filter(Sensor.domain!='switch').filter(Sensor.domain!='fans').order_by(Sensor.sn).limit(10).all()
         return sensors
 
-    def get_sensors_sql(self,session):
+    def get_sensors_sql(self):
         sensors = self.dbsession.execute("select *  from `sensorinfos` join sensors on sensors.`sensorinfo_id`=`sensorinfos`.id where company_id=6 and loc REGEXP '^house1[_]'").fetchall()
         return sensors
 
