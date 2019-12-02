@@ -140,7 +140,7 @@ class FakeMQSensors(object):
         return  sensor_topic,sensor_config
 
     def do_add_sensors(self,company_english_name):
-        sensors = self.get_sensors_sql(self.dbsession)
+        sensors = self.get_sensors_sql()
         for sensor in sensors:
             sensor_topic,sensor_config =  add_sensors(sensor,company_english_name)
             debug(sensor_topic)
