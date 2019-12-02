@@ -67,7 +67,7 @@ class FakeMQSensors(object):
         eval(action)()
         return True
 
-    def do_faker_sensor_value(self):
+    def do_faker_sensor_value(self,company_english_name='qiangshen'):
         debug("do_faker_sensor")
         # self.get_sensors()
         self.get_sensors_sql()
@@ -77,9 +77,9 @@ class FakeMQSensors(object):
         for i in range(len(self.sensors)) :
             # debug("do_faker_sensor:{}".format(i))
             sensor =  random.choice(self.sensors)
-            faker_sensor_topic = "sensor/{}/{}/state".format(sensor[-1],sensor.sn)
+            faker_sensor_topic = "sensor/{}/{}/state".format(company_english_name,sensor.sn)
 
-            faker_sensor_message={"user":sensor[-1],"sn":sensor.sn,"domain":sensor.domain,"location":sensor[3]}
+            faker_sensor_message={"user":company_english_name,"sn":sensor.sn,"domain":sensor.domain,"location":sensor.loc}
             if sensor.domain == "temperature":
                 faker_sensor_message["value"] = round(random.uniform(-10,40) ,1)
             if sensor.domain == "humidity":
@@ -116,7 +116,7 @@ class FakeMQSensors(object):
         self.sensors=sensors
         return sensors
 
-    def add_sensors(sensor,company_english_name):
+    def add_sensors(sensor,company_english_name='qiangshen'):
         device_class="none"
         sensor_topic = "sensor/{}/{}/config".format(company_english_name,sensor.sn)
         if  sensor.domain == 'temperature' or sensor.domain == 'illuminance' or sensor.domain == 'humidity':
