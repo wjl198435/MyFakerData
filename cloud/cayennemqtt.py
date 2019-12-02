@@ -158,8 +158,8 @@ class CayenneMQTTClient:
             self.connected = True
             # Subscribing in on_connect() means that if we lose the connection and
             # reconnect then subscriptions will be renewed.
-            print(self.get_topic_string(COMMAND_TOPIC, True))
-            print(self.get_topic_string(COMMAND_JSON_TOPIC, False))
+            # print(self.get_topic_string(COMMAND_TOPIC, True))
+            # print(self.get_topic_string(COMMAND_JSON_TOPIC, False))
             client.subscribe(self.get_topic_string(COMMAND_TOPIC, True))
             client.subscribe(self.get_topic_string(COMMAND_JSON_TOPIC, False))
 

@@ -88,7 +88,7 @@ def getBigDataBaseSession():
 
 def create_pigs_live_tables():
     mycursor.execute("CREATE TABLE If Not Exists  pigs_live(id BIGINT  AUTO_INCREMENT PRIMARY KEY,total BIGINT, time  DATETIME)")
-
+    mycursor.execute("trucate pigs_live")
 
 
 #exapmle: insert into  pigs_live(total,time)  (select count(*)  ,join_date  from iot_db2.animals where id <100)
@@ -114,6 +114,7 @@ def create_pigs_live_tables():
 
 def count_pigs_deed():
     ## 计数历史全量 死亡数据
+    mycursor.execute("trucate pigs_deed")
     mycursor.execute("CREATE TABLE If Not Exists  pigs_deed(id BIGINT AUTO_INCREMENT PRIMARY KEY,total BIGINT, time  DATETIME)")
     count_pig_deed_sql = "insert into  pigs_deed(total,time) select count(*)  ,date_format(join_date,'%Y-%m-%d') as jdate " \
                      "from iot_db2.animals join iot_db2.animalinfos on iot_db2.animalinfos.id = iot_db2.animals.id " \
@@ -133,6 +134,7 @@ def count_pigs_deed():
 def count_pigs_deed_map():
     ## 计数历史全量 死亡地理分布数据
     mycursor.execute("CREATE TABLE If Not Exists  pigs_deed_geo(id BIGINT AUTO_INCREMENT PRIMARY KEY,total BIGINT,lat FLOAT,lon FLOAT,province VARCHAR(10), time  DATETIME)")
+    mycursor.execute("trucate pigs_deed_geo")
     count_pig_deed_map_sql = "insert into pigs_deed_geo(total,lat,lon,province,time) " \
                              "SELECT  count(iot_db2.animalinfos.id) as value," \
                              "iot_db2.companies.lat  as latitude ," \
@@ -185,6 +187,15 @@ def create_bg_tables(database_name):
 
 if __name__ == '__main__':
     setDebug()
+
+    #更新动物活动时间
+    # update `animalinfos` set time=from_unixtime(
+    # unix_timestamp('2019-12-05')
+    # + floor(
+    #     rand() * ( unix_timestamp('2019-12-05') - unix_timestamp('2019-11-05') + 1 )
+    # )
+    # )
+
     Base.metadata.create_all(engine)
     Session = sessionmaker(bind=engine)
     session = Session()

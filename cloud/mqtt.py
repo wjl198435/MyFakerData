@@ -35,8 +35,8 @@ class CloudServerClient:
 
         print(self.get_topic_string(COMMAND_TOPIC,True))
 
-        self.mqttClient.client.subscribe(self.get_topic_string(COMMAND_TOPIC, True))
-        self.mqttClient.client.subscribe(self.get_topic_string(COMMAND_JSON_TOPIC, False))
+        # self.mqttClient.client.subscribe(self.get_topic_string(COMMAND_TOPIC, True))
+        # self.mqttClient.client.subscribe(self.get_topic_string(COMMAND_JSON_TOPIC, False))
 
         # self.Start()
 
@@ -58,20 +58,22 @@ class CloudServerClient:
             print(sentTopic)
             sentMessage = '{"publish_test":"data"}'
             self.mqttClient.publish_packet(cayennemqtt.DATA_TOPIC, sentMessage,1)
-            # sleep(1)
-        # self.config = Config(APP_SETTINGS)
-        # self.networkConfig = Config(NETWORK_SETTINGS)
-        # self.username = self.config.get('Agent', 'Username', None)
-        # self.password = self.config.get('Agent', 'Password', None)
-        # self.clientId = self.config.get('Agent', 'ClientID', None)
-        # self.connected = False
-        # self.exiting = Event()
+    def mqtt_publish(self,topic,message):
+        #Ignore warning caused by paho mqtt not closing some sockets in the destructor
+        with warnings.catch_warnings():
+            warnings.simplefilter('ignore', ResourceWarning)
+            # sentTopic = self.mqttClient.get_topic_string(cayennemqtt.DATA_TOPIC)
+            # print(sentTopic)
+
+            self.mqttClient.publish_packet(topic, message,1)
+
+
 
 if __name__ == "__main__":
     setDebug()
     client = CloudServerClient("192.168.8.102", 1883, "192.168.8.102")
 
     for i in range(10):
-        # print(i)
-        # client.testPublish()
+        print(i)
+        client.mqtt_publish("test1","2")
         sleep(1)
