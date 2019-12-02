@@ -58,7 +58,7 @@ class FakeMQSensors(object):
         # sensors = self.get_sensors()
         # self.add_sensors(sensors)
         self.do_add_sensors(company_english_name="qiangshen")
-        # TimerThread(self.do_faker_sensor_value, 180, initial_delay=5)
+        TimerThread(self.do_faker_sensor_value, 180, initial_delay=5)
 
 
     def RunAction(self, action):
