@@ -57,17 +57,25 @@ class FakeMQSensors(object):
         # self.schedulerEngine = SchedulerEngine(self, 'client_scheduler')
         #
         # self.add_schedule_job()
-        self.sensors = self.get_sensors()
+
+        domain = 'sensor'
+        self.sensors = self.get_device_from_db(domain)
+        self.do_add_mqtt_sensors(mqtt_client_id=MQTT_CLIENT_ID)
         # debug("sensors.len={}".format(len(sensors)))
 
+        domain = 'switch'
+        self.switches = self.get_device_from_db(domain)
+        debug("self.switches={}".format(len(self.switches)))
+        self.do_add_mqtt_switch(mqtt_client_id=MQTT_CLIENT_ID)
 
-        self.do_add_mqtt_devices(mqtt_client_id=MQTT_CLIENT_ID)
-        TimerThread(self.do_faker_sensor_value, 180, initial_delay=5)
+
+        # TimerThread(self.do_faker_sensor_value, 180, initial_delay=5)
 
 
     def RunAction(self, action):
         debug('RunAction:' + action)
-        self.get_sensors()
+        # domain = 'sensor'
+        self.get_device_from_db()
         eval(action)()
         return True
 
@@ -75,8 +83,7 @@ class FakeMQSensors(object):
         debug("do_faker_sensor")
         # self.get_sensors_sql()
         for sensor in  self.sensors :
-            # debug("do_faker_sensor:{}".format(i))
-            # sensor =  random.choice(self.sensors)
+
             faker_sensor_topic = "sensor/{}/{}/state".format(mqtt_client_id,sensor.sn)
 
             faker_sensor_message={"user":MQTT_CLIENT_ID,"sn":sensor.sn,"domain":sensor.domain,"device_class":sensor.device_class,"location":sensor.loc}
@@ -101,37 +108,20 @@ class FakeMQSensors(object):
         return event
      #/* select  concat('room', FLOOR(1 + (RAND() * 10))); */
 
-    def get_sensors(self):
+    def get_device_from_db(self,domain='sensor'):
         sensors = self.dbsession. \
                 query(Sensor.domain,Sensor.device_class,Sensor.sn,Sensor.unit,SensorInfo.loc). \
                 join(SensorInfo).join(Company). \
                 filter(Sensor.company_id==str(self._company_id)). \
-                filter(Sensor.domain=='sensor').order_by(Sensor.sn).all()
+                filter(Sensor.domain==domain).order_by(Sensor.sn).all()
         self.sensors = sensors
-        # debug("get_sensors",len(sensors))
+
         return sensors
 
     def get_sensors_sql(self):
         sensors = self.dbsession.execute("select *  from `sensorinfos` join sensors on sensors.`sensorinfo_id`=`sensorinfos`.id where company_id=6 and domain='sensor'  and loc REGEXP '^house1[_]'").fetchall()
         self.sensors=sensors
         return sensors
-
-    def add_mqtt_switch_devices(self, switch, mqtt_client_id='qiangshen'):
-        device_class="switch"
-        switch_topic = "switch/{}/{}/config".format(mqtt_client_id,switch.sn)
-        switch_config= \
-            {
-                "device_class": device_class,
-                "name": str(switch.loc+"_"+switch.domain),
-                "state_topic": "{}/switch/{}/{}/state".format(MQTT_DIS_PREFIX,mqtt_client_id,switch.sn),
-                "command_topic": "{}/switch/{}/{}/set".format(MQTT_DIS_PREFIX,mqtt_client_id,switch.sn)
-            }
-        # message = {"name": "garden88", "device_class": "motion", "state_topic": "homeassistant/binary_sensor/garden/state"}
-
-        debug("switch_topic:{}".format(switch_topic))
-        debug("switch_config:{}".format(switch_config))
-        return  switch_topic,switch_config
-
 
     def add_mqtt_sensor_devices(self, sensor, mqtt_client_id='qiangshen'):
         device_class="none"
@@ -146,23 +136,28 @@ class FakeMQSensors(object):
         sensor_config= \
             {
             "device_class": device_class,
+            "friendly_name": device_class,
             "name": str(sensor.loc+"_"+sensor.device_class),
             "state_topic": "{}/sensor/{}/{}/state".format(MQTT_DIS_PREFIX,mqtt_client_id,sensor.sn),
             "unit_of_measurement": sensor.unit,
             "value_template": "{{ value_json.value}}"
             }
-        # message = {"name": "garden88", "device_class": "motion", "state_topic": "homeassistant/binary_sensor/garden/state"}
 
         debug("sensor_topic:{}".format(sensor_topic))
         debug("sensor_config:{}".format(sensor_config))
         return  sensor_topic,sensor_config
 
-    def do_add_mqtt_devices(self, mqtt_client_id=""):
+    def do_add_mqtt_switch(self, mqtt_client_id=""):
+        _switchs = self.switches
+        for switch in _switchs:
+            print(switch)
+            # sensor_topic,sensor_config =  self.add_mqtt_sensor_devices(sensor, mqtt_client_id)
+            # self._serverclient.EnqueuePacket(sensor_config ,sensor_topic)
+
+    def do_add_mqtt_sensors(self, mqtt_client_id=""):
         _sensors = self.sensors
         for sensor in _sensors:
             sensor_topic,sensor_config =  self.add_mqtt_sensor_devices(sensor, mqtt_client_id)
-            # debug(sensor_topic)
-            # debug(sensor_config)
             self._serverclient.EnqueuePacket(sensor_config ,sensor_topic)
 
 
