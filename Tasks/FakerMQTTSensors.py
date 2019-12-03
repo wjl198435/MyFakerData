@@ -60,7 +60,7 @@ class FakeMQSensors(object):
 
         domain = 'sensor'
         self.sensors = self.get_device_from_db(domain)
-        # self.do_add_mqtt_sensors(mqtt_client_id=MQTT_CLIENT_ID)
+        self.do_add_mqtt_sensors(mqtt_client_id=MQTT_CLIENT_ID)
 
 
         # add switch
@@ -69,7 +69,7 @@ class FakeMQSensors(object):
         debug("self.switches={}".format(len(self.switches)))
         self.do_add_mqtt_switch(mqtt_client_id=MQTT_CLIENT_ID)
 
-        #TimerThread(self.do_faker_sensor_value, 180, initial_delay=5)
+        TimerThread(self.do_faker_sensor_value, 180, initial_delay=5)
 
 
     def RunAction(self, action):
