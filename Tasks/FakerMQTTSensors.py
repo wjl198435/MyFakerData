@@ -52,24 +52,24 @@ class FakeMQSensors(object):
         while self._serverclient.mqttClient.connected is False:
             pass
 
-        # self.add_temperature_sensors()
 
         # self.schedulerEngine = SchedulerEngine(self, 'client_scheduler')
-        #
         # self.add_schedule_job()
+
+        ## add sensors
 
         domain = 'sensor'
         self.sensors = self.get_device_from_db(domain)
-        self.do_add_mqtt_sensors(mqtt_client_id=MQTT_CLIENT_ID)
-        # debug("sensors.len={}".format(len(sensors)))
+        # self.do_add_mqtt_sensors(mqtt_client_id=MQTT_CLIENT_ID)
 
+
+        # add switch
         domain = 'switch'
         self.switches = self.get_device_from_db(domain)
         debug("self.switches={}".format(len(self.switches)))
         self.do_add_mqtt_switch(mqtt_client_id=MQTT_CLIENT_ID)
 
-
-        # TimerThread(self.do_faker_sensor_value, 180, initial_delay=5)
+        #TimerThread(self.do_faker_sensor_value, 180, initial_delay=5)
 
 
     def RunAction(self, action):
@@ -84,14 +84,14 @@ class FakeMQSensors(object):
         # self.get_sensors_sql()
         for sensor in  self.sensors :
 
-            faker_sensor_topic = "sensor/{}/{}/state".format(mqtt_client_id,sensor.sn)
+            faker_sensor_topic = "sensor/{}/{}/state".format(mqtt_client_id,sensor.loc+"_"+sensor.device_class)
 
             faker_sensor_message={"user":MQTT_CLIENT_ID,"sn":sensor.sn,"domain":sensor.domain,"device_class":sensor.device_class,"location":sensor.loc}
             if sensor.device_class == "temperature":
                 faker_sensor_message["value"] = round(random.uniform(-10,40) ,1)
             elif sensor.device_class == "humidity":
                 faker_sensor_message["value"] = round(random.uniform(1,99) ,1)
-            elif sensor.device_class == "pm2.5":
+            elif sensor.device_class == "pm25":
                 faker_sensor_message["value"] = round(random.uniform(1,999) ,1)
             elif sensor.device_class == "illuminance":
                 faker_sensor_message["value"] =  round(random.uniform(1,4999) ,1)
@@ -109,14 +109,12 @@ class FakeMQSensors(object):
      #/* select  concat('room', FLOOR(1 + (RAND() * 10))); */
 
     def get_device_from_db(self,domain='sensor'):
-        sensors = self.dbsession. \
+        deivces = self.dbsession. \
                 query(Sensor.domain,Sensor.device_class,Sensor.sn,Sensor.unit,SensorInfo.loc). \
                 join(SensorInfo).join(Company). \
                 filter(Sensor.company_id==str(self._company_id)). \
                 filter(Sensor.domain==domain).order_by(Sensor.sn).all()
-        self.sensors = sensors
-
-        return sensors
+        return deivces
 
     def get_sensors_sql(self):
         sensors = self.dbsession.execute("select *  from `sensorinfos` join sensors on sensors.`sensorinfo_id`=`sensorinfos`.id where company_id=6 and domain='sensor'  and loc REGEXP '^house1[_]'").fetchall()
@@ -126,19 +124,19 @@ class FakeMQSensors(object):
     def add_mqtt_sensor_devices(self, sensor, mqtt_client_id='qiangshen'):
         device_class="none"
         unit = "℃"
-        sensor_topic = "sensor/{}/{}/config".format(mqtt_client_id,sensor.sn)
+        # sensor_topic = "sensor/{}/{}/config".format(mqtt_client_id,sensor.sn)
+        sensor_topic = "sensor/{}/{}/config".format(mqtt_client_id,sensor.loc+"_"+sensor.device_class)
         if sensor.device_class == "nh3":
             device_class = 'power'
-        elif sensor.device_class == 'pm2.5':
+        elif sensor.device_class == 'pm25':
             device_class = 'pressure'
         else:
             device_class = sensor.device_class
         sensor_config= \
             {
             "device_class": device_class,
-            "friendly_name": device_class,
             "name": str(sensor.loc+"_"+sensor.device_class),
-            "state_topic": "{}/sensor/{}/{}/state".format(MQTT_DIS_PREFIX,mqtt_client_id,sensor.sn),
+            "state_topic": "{}/sensor/{}/{}/state".format(MQTT_DIS_PREFIX,mqtt_client_id,sensor.loc+"_"+sensor.device_class),
             "unit_of_measurement": sensor.unit,
             "value_template": "{{ value_json.value}}"
             }

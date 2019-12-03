@@ -89,7 +89,7 @@ def update_sensors():
     sensors = session.query(Sensor,SensorInfo).join(SensorInfo).filter(Sensor.sensorinfo_id==SensorInfo.id).all()
     index = 0
     device ={
-             'sensor':['temperature','humidity','illuminance','pm2.5','nh3'],
+             'sensor':['temperature','humidity','illuminance','pm25','nh3'],
              'light':['light'],
              'switch':['switch','heater','cool'],
              'fan':['fan'],
@@ -113,7 +113,7 @@ def update_sensors():
                             _sensor.unit='%'
                         elif _sensor.device_class == "illuminance":
                             _sensor.unit='lu'
-                        elif _sensor.device_class == "pm2.5":
+                        elif _sensor.device_class == "pm25":
                             _sensor.unit='μg/m3'
                         elif _sensor.device_class == "nh3":
                             _sensor.unit='ppm'
@@ -125,7 +125,7 @@ def update_sensors():
                         index += 1
 
                         print("index={} house{}/room{}/domain-{}/device_class-{}".format(index,house,room,domain,dev_class))
-                        print("sensors.len",len(sensors))
+                        # print("sensors.len",len(sensors))
                     else:
                         return
         session.commit()
