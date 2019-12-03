@@ -61,7 +61,7 @@ class FakeMQSensors(object):
         # debug("sensors.len={}".format(len(sensors)))
 
 
-        # self.do_add_mqtt_devices(mqtt_client_id=MQTT_CLIENT_ID)
+        self.do_add_mqtt_devices(mqtt_client_id=MQTT_CLIENT_ID)
         TimerThread(self.do_faker_sensor_value, 180, initial_delay=5)
 
 
