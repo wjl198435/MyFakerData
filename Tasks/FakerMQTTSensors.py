@@ -143,8 +143,8 @@ class FakeMQSensors(object):
             "value_template": "{{ value_json.value}}"
             }
 
-        debug("sensor_topic:{}".format(sensor_topic))
-        debug("sensor_config:{}".format(sensor_config))
+        # debug("sensor_topic:{}".format(sensor_topic))
+        # debug("sensor_config:{}".format(sensor_config))
         return  sensor_topic,sensor_config
 
     def do_add_mqtt_switch(self, mqtt_client_id=""):
