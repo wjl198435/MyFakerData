@@ -8,7 +8,7 @@ import sys
 sys.path.append("..")
 
 import random
-from createIOTables import Company,AnimalInfo,Sensor,Camera
+from createIOTables import Company,AnimalInfo,Sensor,Camera,SensorInfo
 
 from config import DB_URL
 from utils.city2lnglat import address2latlng
@@ -85,7 +85,63 @@ def update_camera_company_id(Table):
     # company_id,_ = session.query(Company.id)
     # for company in session.query(Company.id).all():
     #     print(company.id)
+def update_sensors():
+    sensors = session.query(Sensor,SensorInfo).join(SensorInfo).filter(Sensor.sensorinfo_id==SensorInfo.id).all()
+    index = 0
+    device ={
+             'sensor':['temperature','humidity','illuminance','pm2.5','nh3'],
+             'light':['light'],
+             'switch':['switch','heater','cool'],
+             'fan':['fan'],
+             'climate':['climate'],
+             # 'lock':['lock'],
+             # 'cover':['cover']
+             }
 
+    for house in range(1,9):
+        for room in range (1,11):
+            for domain,device_class in device.items():
+                for dev_class in device_class:
+                    if index < len(sensors):
+                        sensor = sensors[index]
+                        _sensor = sensor[0]
+                        _sensor.domain = domain
+                        _sensor.device_class = dev_class
+                        if _sensor.device_class == "temperature":
+                            _sensor.unit='℃'
+                        elif _sensor.device_class == "humidity":
+                            _sensor.unit='%'
+                        elif _sensor.device_class == "illuminance":
+                            _sensor.unit='lu'
+                        elif _sensor.device_class == "pm2.5":
+                            _sensor.unit='μg/m3'
+                        elif _sensor.device_class == "nh3":
+                            _sensor.unit='ppm'
+                        else:
+                            _sensor.unit=''
+
+                        _sensorinfo = sensor[1]
+                        _sensorinfo.loc = "house{}_room{}".format(house,room)
+                        index += 1
+
+                        print("index={} house{}/room{}/domain-{}/device_class-{}".format(index,house,room,domain,dev_class))
+                        print("sensors.len",len(sensors))
+                    else:
+                        return
+        session.commit()
+
+
+
+
+    # for sensor in sensors:
+    #     # print(sensor)
+    #     sensor1 = sensor[0]
+    #     sensor1.domain="sensor"
+    #     # print(sensor1.domain="sensor")
+    #     sensorinfo = sensor[1]
+        # print(sensorinfo)
+    # session.commit()
+    # sensors = session.execute("select count(*)  from `sensorinfos` join sensors on sensors.`sensorinfo_id`=`sensorinfos`.id order by loc").fetchall()
 
     # print("update_latlng_from_address")
     # for animalinfo in session.query(Sensor):
@@ -98,7 +154,14 @@ def update_camera_company_id(Table):
 if __name__ == '__main__':
 
     # update_latlng_from_address()
-    update_company_english_name()
+    # update_company_english_name()
+    update_sensors()
+
+    # device ={'sensor':['temperature','humidity','illuminance','aqi','nh3'],'light':['light']}
+    # for d,x in device.items():
+    #     for xx in x:
+    #         print(d,xx)
+
     # update_sensor_company_id(Sensor)
     # update_camera_company_id(Camera)
     # print(random.choice(get_company_id()))

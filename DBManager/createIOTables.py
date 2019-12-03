@@ -264,7 +264,8 @@ class Sensor(Base):
     sn = Column(String(20),nullable=False, index=True)   # 设备序列号
 
     friendly_name = Column(String(64))  # 设备名称
-    domain = Column(String(16))  # 设备类型
+    domain = Column(String(16))  # 设备主类
+    device_class = Column(String(16))  # 设备次型
     unit = Column(String(10)) # 设备单位
 
     event_id = Column(String(255))  # 事件id
@@ -282,6 +283,8 @@ class Sensor(Base):
     sensorinfo_id = Column(Integer, ForeignKey('sensorinfos.id'))
     sensorinfo = relationship('SensorInfo', backref='sensorinfo', uselist=False)
 
+    def __repr__(self):
+        return '%s(%r,%r,%s,%s,%s)' % (self.__class__.__name__, self.sn,self.domain,self.device_class,self.unit,self.company_id)
 
 
 class SensorInfo(Base):
@@ -303,7 +306,7 @@ class SensorInfo(Base):
     manufactures_tel = Column(String(11))  # 设备提供商联系电话
 
     def __repr__(self):
-        return '%s(%r)' % (self.__class__.__name__, self.name)
+        return '%s(%r,%r,%r)' % (self.__class__.__name__, self.loc,self.mac,self.manufacturers)
 
 
 class Camera(Base):
