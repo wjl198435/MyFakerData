@@ -45,7 +45,9 @@ class FakeMQSensors(object):
         self.dbsession = session
         self._company_id = company_id
         self._serverclient = serverclient
-        self.sensors = None
+        self.sensors = []
+        self.switches = []
+        self.lights = []
         Session = sessionmaker(bind=engine)
         self.dbsession = Session()
 
@@ -56,7 +58,7 @@ class FakeMQSensors(object):
         # self.schedulerEngine = SchedulerEngine(self, 'client_scheduler')
         # self.add_schedule_job()
 
-        ## add sensors
+        # add sensors
 
         domain = 'sensor'
         self.sensors = self.get_device_from_db(domain)
@@ -69,7 +71,13 @@ class FakeMQSensors(object):
         debug("self.switches={}".format(len(self.switches)))
         self.do_add_mqtt_switch(mqtt_client_id=MQTT_CLIENT_ID)
 
-        TimerThread(self.do_faker_sensor_value, 180, initial_delay=5)
+
+        domain = 'light'
+        self.lights = self.get_device_from_db(domain)
+        debug("self.lights={}".format(len(self.lights)))
+        self.do_add_mqtt_lights(mqtt_client_id=MQTT_CLIENT_ID)
+
+        # TimerThread(self.do_faker_sensor_value, 180, initial_delay=5)
 
 
     def RunAction(self, action):
@@ -148,9 +156,44 @@ class FakeMQSensors(object):
     def do_add_mqtt_switch(self, mqtt_client_id=""):
         _switchs = self.switches
         for switch in _switchs:
-            print(switch)
+            switch_topic = "switch/{}/{}/config".format(mqtt_client_id,switch.loc + "_"+ switch.device_class)
+            switch_config =\
+                {
+                 "~": "homeassistant/switch/{}/{}".format(mqtt_client_id,switch.loc + "_"+ switch.device_class),
+                 "name": "{}".format(switch.loc + "_"+ switch.device_class),
+                 "cmd_t": "~/set",
+                 "stat_t": "~/state",
+                 "payload_on": "1",
+                 "payload_off": "0",
+                 "value_template": '{{value_json.on}}'
+                }
+            debug(switch_topic)
+            debug(switch_config)
             # sensor_topic,sensor_config =  self.add_mqtt_sensor_devices(sensor, mqtt_client_id)
-            # self._serverclient.EnqueuePacket(sensor_config ,sensor_topic)
+            self._serverclient.EnqueuePacket(switch_config ,switch_topic)
+
+
+    def do_add_mqtt_lights(self, mqtt_client_id=""):
+        _lights = self.lights
+        for light in _lights:
+            light_topic = "switch/{}/{}/config".format(mqtt_client_id,light.loc + "_"+ light.device_class)
+            light_config = \
+                {
+                    "~": "homeassistant/light/{}/{}".format(mqtt_client_id,light.loc + "_"+ light.device_class),
+                    "name": "{}".format(light.loc + "_"+ light.device_class),
+                    "cmd_t": "~/set",
+                    "stat_t": "~/state",
+                    "payload_on": "1",
+                    "payload_off": "0",
+                    "value_template": '{{value_json.on}}'
+                }
+            debug(light_topic)
+            debug(light_config)
+            # sensor_topic,sensor_config =  self.add_mqtt_sensor_devices(sensor, mqtt_client_id)
+            self._serverclient.EnqueuePacket(light_config ,light_topic)
+
+
+
 
     def do_add_mqtt_sensors(self, mqtt_client_id=""):
         _sensors = self.sensors
