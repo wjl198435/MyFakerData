@@ -176,7 +176,7 @@ class FakeMQSensors(object):
     def do_add_mqtt_lights(self, mqtt_client_id=""):
         _lights = self.lights
         for light in _lights:
-            light_topic = "switch/{}/{}/config".format(mqtt_client_id,light.loc + "_"+ light.device_class)
+            light_topic = "light/{}/{}/config".format(mqtt_client_id,light.loc + "_"+ light.device_class)
             light_config = \
                 {
                     "~": "homeassistant/light/{}/{}".format(mqtt_client_id,light.loc + "_"+ light.device_class),
