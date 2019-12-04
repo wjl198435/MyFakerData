@@ -270,8 +270,10 @@ class CayenneMQTTClient:
         qos: quality of service level to use.
         retain: if True, the message will be set as the "last known good"/retained message for the topic.
         """
-        debug('Publish to {}'.format(self.get_topic_string(topic)))
+        debug('Publish to {}  packet {}'.format(self.get_topic_string(topic),packet))
         self.client.publish(self.get_topic_string(topic), packet, qos, retain)
+
+
 
     def publish_response(self, msg_id, error_message=None):
         """Send a command response to Cayenne.

@@ -57,7 +57,7 @@ class CloudServerClient:
             sentTopic = self.mqttClient.get_topic_string(cayennemqtt.DATA_TOPIC)
             print(sentTopic)
             sentMessage = '{"publish_test":"data"}'
-            self.mqttClient.publish_packet(cayennemqtt.DATA_TOPIC, sentMessage,1)
+            self.mqttClient.publish_packet("switch/qiangshen/house4_room4_switch/avail", "online",1)
     def mqtt_publish(self,topic,message):
         #Ignore warning caused by paho mqtt not closing some sockets in the destructor
         with warnings.catch_warnings():
@@ -72,8 +72,11 @@ class CloudServerClient:
 if __name__ == "__main__":
     setDebug()
     client = CloudServerClient("192.168.8.102", 1883, "192.168.8.102")
-
+    while client.mqttClient.connected is False:
+        pass
+    # homeassistant/switch/qiangshen/house4_room4_switch/avail
     for i in range(10):
         print(i)
-        client.mqtt_publish("test1","2")
+        # client.mqtt_publish("test","2")
+        client.testPublish()
         sleep(1)

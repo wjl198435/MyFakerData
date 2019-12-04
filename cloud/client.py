@@ -616,7 +616,7 @@ class CloudServerClient:
 
     def EnqueuePacket(self, message, topic=cayennemqtt.DATA_TOPIC):
         """Enqueue a message packet to send to the server"""
-        debug("EnqueuePacket->{} {}".format())
+        # debug("EnqueuePacket->{} {}".format())
         packet = (topic, message)
         self.writeQueue.put(packet)
 

@@ -37,17 +37,19 @@ auth_pass = 'demo'
 count=1
 run=True
 
-test_topic = "homeassistant/sensor/qiangshen/8888888/state"
+test_topic = "homeassistant/switch/qiangshen/house1_room3_heater/avail"
 
-message = {
-    "temperature": 25.8,
-    "sn": "8888888",
-    "humidity": 96.8,
-    "user": "test",
-    "location": "house1_room1_test",
-    "domain": "temperature",
-    "value": "25"
-}
+# message = {
+#     "temperature": 25.8,
+#     "sn": "8888888",
+#     "humidity": 96.8,
+#     "user": "test",
+#     "location": "house1_room1_test",
+#     "domain": "temperature",
+#     "value": "25"
+# }
+
+message="online"
 
 def on_message_test(client, obj, msg):
     global count, run
