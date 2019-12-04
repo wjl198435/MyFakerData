@@ -48,6 +48,8 @@ class FakeMQSensors(object):
         self.sensors = []
         self.switches = []
         self.lights = []
+        self.climates = []
+        self.fans = []
         Session = sessionmaker(bind=engine)
         self.dbsession = Session()
 
@@ -58,24 +60,36 @@ class FakeMQSensors(object):
         # self.schedulerEngine = SchedulerEngine(self, 'client_scheduler')
         # self.add_schedule_job()
 
-        # add sensors
+        # # add  mqtt sensors
+        # domain = 'sensor'
+        # self.sensors = self.get_device_from_db(domain)
+        # self.do_add_mqtt_sensors(mqtt_client_id=MQTT_CLIENT_ID)
+        #
+        #
+        # # add mqtt switch
+        # domain = 'switch'
+        # self.switches = self.get_device_from_db(domain)
+        # debug("self.switches={}".format(len(self.switches)))
+        # self.do_add_mqtt_switch(mqtt_client_id=MQTT_CLIENT_ID)
 
-        domain = 'sensor'
-        self.sensors = self.get_device_from_db(domain)
-        self.do_add_mqtt_sensors(mqtt_client_id=MQTT_CLIENT_ID)
+        # # add mqtt light
+        # domain = 'light'
+        # self.lights = self.get_device_from_db(domain)
+        # debug("self.lights={}".format(len(self.lights)))
+        # self.do_add_mqtt_lights(mqtt_client_id=MQTT_CLIENT_ID)
+        #
+        # # add mqtt climate
+        # domain = 'climate'
+        # self.climates = self.get_device_from_db(domain)
+        # debug("self.climate={}".format(len(self.climates)))
+        # self.do_add_mqtt_climates(mqtt_client_id=MQTT_CLIENT_ID)
 
 
-        # add switch
-        domain = 'switch'
-        self.switches = self.get_device_from_db(domain)
-        debug("self.switches={}".format(len(self.switches)))
-        self.do_add_mqtt_switch(mqtt_client_id=MQTT_CLIENT_ID)
-
-
-        domain = 'light'
-        self.lights = self.get_device_from_db(domain)
-        debug("self.lights={}".format(len(self.lights)))
-        self.do_add_mqtt_lights(mqtt_client_id=MQTT_CLIENT_ID)
+        # add mqtt climate
+        domain = 'fan'
+        self.fans = self.get_device_from_db(domain)
+        debug("self.fan={}".format(len(self.fans)))
+        self.do_add_mqtt_fans(mqtt_client_id=MQTT_CLIENT_ID)
 
         TimerThread(self.do_faker_sensor_value, 180, initial_delay=5)
 
@@ -143,7 +157,7 @@ class FakeMQSensors(object):
         sensor_config= \
             {
             "device_class": device_class,
-            "name": str(sensor.loc+"_"+sensor.device_class),
+            "name": str(sensor.loc)+"_"+sensor.device_class,
             "state_topic": "{}/sensor/{}/{}/state".format(MQTT_DIS_PREFIX,mqtt_client_id,sensor.loc+"_"+sensor.device_class),
             "unit_of_measurement": sensor.unit,
             "value_template": "{{ value_json.value}}"
@@ -160,7 +174,7 @@ class FakeMQSensors(object):
             switch_config =\
                 {
                  "~": "homeassistant/switch/{}/{}".format(mqtt_client_id,switch.loc + "_"+ switch.device_class),
-                 "name": "{}".format(switch.loc + "_"+ switch.device_class),
+                 "name": "{}".format(switch.loc )+"_"+sensor.device_class,
                  "cmd_t": "~/set",
                  "stat_t": "~/state",
                  "payload_on": "1",
@@ -180,7 +194,7 @@ class FakeMQSensors(object):
             light_config = \
                 {
                     "~": "homeassistant/light/{}/{}".format(mqtt_client_id,light.loc + "_"+ light.device_class),
-                    "name": "{}".format(light.loc + "_"+ light.device_class),
+                    "name": "{}".format(light.loc),
                     "cmd_t": "~/set",
                     "stat_t": "~/state",
                     "payload_on": "1",
@@ -191,6 +205,75 @@ class FakeMQSensors(object):
             debug(light_config)
             # sensor_topic,sensor_config =  self.add_mqtt_sensor_devices(sensor, mqtt_client_id)
             self._serverclient.EnqueuePacket(light_config ,light_topic)
+
+    def do_add_mqtt_fans(self, mqtt_client_id=""):
+        #
+        # payload { "speed": "low"}
+        # payload  { "state": "low"}
+        _fans = self.fans
+        for fan in _fans[0:2]:
+            fan_topic = "fan/{}/{}/config".format(mqtt_client_id,fan.loc + "_"+ fan.device_class)
+            fan_config = \
+                {
+                    "~": "homeassistant/fan/{}/{}".format(mqtt_client_id,fan.loc + "_"+ fan.device_class),
+                    "name": "{}".format(fan.loc),
+                    "cmd_t": "~/set",
+                    "stat_t": "~/state",
+                    "pl_on": "on",
+                    "pl_off": "off",
+                    "stat_val_tpl": '{{value_json.state}}',
+                    "spd_stat_t": "~/state",
+                    "spd_cmd_t": "~/set",
+                    "spds": ["off","low","medium","high"],
+                    "spd_val_tpl": '{{value_json.speed}}',
+                    "qos": "0"
+                }
+            debug(fan_topic)
+            debug(fan_config)
+            # sensor_topic,sensor_config =  self.add_mqtt_sensor_devices(sensor, mqtt_client_id)
+            self._serverclient.EnqueuePacket(fan_config ,fan_topic)
+
+
+
+    def do_add_mqtt_climates(self, mqtt_client_id=""):
+        _climates = self.climates
+        for climate in _climates:
+            climate_topic = "climate/{}/{}/config".format(mqtt_client_id,climate.loc + "_"+ climate.device_class)
+
+            # State payload
+            # {
+            #     "mode":"off",
+            #     "target_temp":"21.50",
+            #     "current_temp":"23.60",
+            # }
+            climate_config = \
+                {
+                    "~": "homeassistant/climate/{}/{}".format(mqtt_client_id,climate.loc),
+                    "name": "{}".format(climate.loc),
+                    "mode_cmd_t": "~/set",
+                    "mode_stat_t": "~/state",
+                    "mode_stat_tpl":"",
+                    "avty_t":"~/available",
+                    "pl_avail":"online",
+                    "payload_on": "1",
+                    "pl_not_avail":"offline",
+                    "temp_cmd_t":"~/targetTempCmd",
+                    "temp_stat_t":"~/state",
+                    "curr_temp_t":"~/state",
+                    "curr_temp_tpl":"",
+                    "curr_temp_tpl":"",
+                    "min_temp":"15",
+                    "max_temp":"25",
+                    "temp_step":"0.5",
+                    "modes":["off","cool","fan_only" ,'auto',"dry","heat"]
+                }
+
+
+
+            debug(climate_topic)
+            debug(climate_config)
+            # sensor_topic,sensor_config =  self.add_mqtt_sensor_devices(sensor, mqtt_client_id)
+            self._serverclient.EnqueuePacket(climate_config ,climate_topic)
 
 
 
