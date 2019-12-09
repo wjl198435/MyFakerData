@@ -15,7 +15,7 @@ import datetime
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, sessionmaker
-from sqlalchemy import Column, String, Integer, ForeignKey, Table, DateTime, FLOAT, Text,Time,Date
+from sqlalchemy import Column, String, Integer, ForeignKey, Table, DateTime, FLOAT, Text,Time,Date,TIMESTAMP
 
 Base = declarative_base()
 engine = create_engine(BD_DATA_URL)
@@ -44,7 +44,7 @@ class PigPriceTable(Base):
     内三元 =  Column(FLOAT)
     土杂猪 =  Column(FLOAT)
     日期 = Column(Date, nullable=False)
-    time = Column(DateTime, nullable=False,default=datetime.datetime.utcnow,onupdate=datetime.datetime.utcnow)
+    time = Column(TIMESTAMP, nullable=False,default=datetime.datetime.utcnow,onupdate=datetime.datetime.utcnow)
     def __repr__(self):
         return '%s(%r) %s' % (self.__class__.__name__, self.日期,self.省份)
 
@@ -68,13 +68,19 @@ class PigsLiveTable(Base):
     __tablename__ = 'PigsLiveTable'
     id = Column(Integer, primary_key=True,index=True)
     total = Column(Integer)
-    time = Column(DateTime, nullable=False,default=datetime.datetime.utcnow,onupdate=datetime.datetime.utcnow)
+    time = Column(TIMESTAMP, nullable=False,default=datetime.datetime.now(),onupdate=datetime.datetime.utcnow)
+    lat =  Column(FLOAT)
+    lon =Column(FLOAT)
+    province = Column(String(10))
+    company = Column(String(50))
+    company_id = Column(Integer)
+
 
 class PigsDeedTable(Base):
     __tablename__ = 'PigsDeedTable'
     id = Column(Integer, primary_key=True,index=True)
     total = Column(Integer)
-    time = Column(DateTime, nullable=False,default=datetime.datetime.now(),onupdate=datetime.datetime.utcnow)
+    time = Column(TIMESTAMP, nullable=False,default=datetime.datetime.now(),onupdate=datetime.datetime.utcnow)
     lat =  Column(FLOAT)
     lon =Column(FLOAT)
     province = Column(String(10))
@@ -86,9 +92,37 @@ def getBigDataBaseSession():
     session = Session()
     return session
 
-def create_pigs_live_tables():
-    mycursor.execute("CREATE TABLE If Not Exists  pigs_live(id BIGINT  AUTO_INCREMENT PRIMARY KEY,total BIGINT, time  DATETIME)")
-    mycursor.execute("trucate pigs_live")
+#####################################################################
+#### sql
+#####################################################################
+
+# def create_pigs_deed_geo(name="pigs_deed_geo"):
+#     ## 计数历史全量 死亡地理分布数据
+#     mycursor.execute("CREATE TABLE If Not Exists  "+name+"(id BIGINT AUTO_INCREMENT PRIMARY KEY,total BIGINT,lat FLOAT,lon FLOAT,province VARCHAR(10), time  TIMESTAMP)")
+#     iot_bg_db.commit()
+# def create_pigs_deed_table(name="pigs_deed"):
+#     mycursor.execute("CREATE TABLE If Not Exists  "+name+"(id BIGINT AUTO_INCREMENT PRIMARY KEY,total BIGINT, time  TIMESTAMP)")
+#     iot_bg_db.commit()
+# def create_pigs_live_table(name="pigs_live"):
+#     mycursor.execute("CREATE TABLE If Not Exists  "+name+"(id BIGINT  AUTO_INCREMENT PRIMARY KEY,total BIGINT, time  TIMESTAMP)")
+#     iot_bg_db.commit()
+# def create_pig_price_table(name="pig_price"):
+#     mycursor.execute("CREATE TABLE If Not Exists  "+name+"(id BIGINT  AUTO_INCREMENT PRIMARY KEY,省份 VARCHAR(10), 外三元 FLOAT,内三元 FLOAT,土杂猪 FLOAT,日期 DATE ,time  TIMESTAMP   ON UPDATE current_timestamp())")
+#     iot_bg_db.commit()
+
+def create_database(database_name):
+    mycursor.execute("CREATE DATABASE If Not Exists "+ database_name )
+
+# def create_bg_tables(database_name):
+#     try:
+#         create_database(database_name)
+#         create_pig_price_table()
+#         create_pigs_live_table()
+#         create_pigs_deed_table()
+#         create_pigs_deed_geo()
+#         iot_bg_db.close()
+#     except Exception as e:
+#         error(str(e))
 
 
 #exapmle: insert into  pigs_live(total,time)  (select count(*)  ,join_date  from iot_db2.animals where id <100)
@@ -97,116 +131,71 @@ def create_pigs_live_tables():
 # order by jdate
 
 ## 计数历史全量 存活数据
+def count_pigs_live(tableName=""):
 
-    count_pig_live_sql = "insert into  pigs_live(total,time) select count(*)  ,date_format(join_date,'%Y-%m-%d') as jdate " \
-       "from iot_db2.animals join iot_db2.animalinfos on iot_db2.animalinfos.id = iot_db2.animals.id " \
-       " where  iot_db2.animalinfos.health_status <>'死亡' group by jdate  order by jdate"
+    mycursor.execute("CREATE TABLE If Not Exists  "+tableName+"(id BIGINT AUTO_INCREMENT PRIMARY KEY,total BIGINT,lat FLOAT,lon FLOAT,province VARCHAR(10), time  TIMESTAMP)")
+    mycursor.execute("TRUNCATE "+tableName)
 
-    info(count_pig_live_sql)
+    count_pigs_live_sql = "insert into "+tableName+"(total,lat,lon,province,time,company,company_id) " \
+                                                   "SELECT  count(iot_db2.animalinfos.id) as value," \
+                                                   "iot_db2.companies.lat  as latitude ," \
+                                                   "iot_db2.companies.lon as longitude," \
+                                                   "iot_db2.`companies`.`province`," \
+                                                   "date_format(iot_db2.animalinfos.time,'%Y-%m-%d'),  " \
+                                                   "iot_db2.companies.name as company, " \
+                                                   "iot_db2.companies.id as company_id" \
+                                                   " FROM (iot_db2.animals INNER JOIN iot_db2.companies ON iot_db2.animals.`company_id`=iot_db2.companies.id) " \
+                                                   "INNER JOIN iot_db2.animalinfos ON iot_db2.animals.`animalinfo_id`=iot_db2.animalinfos.id " \
+                                                   "where iot_db2.animalinfos.health_status <> '死亡'  group by `province` ,iot_db2.companies.id  order by value ASC"
+
+    info(count_pigs_live_sql)
     info("正在执行-历史生猪存活数据统计....")
     try:
-        mycursor.execute(count_pig_live_sql)
+        mycursor.execute(count_pigs_live_sql)
     except:
-        error(count_pig_live_sql)
+        error(count_pigs_live_sql)
         error("Error: unable to fecth data:")
     iot_bg_db.commit()
 
 
-def count_pigs_deed():
-    ## 计数历史全量 死亡数据
-    mycursor.execute("trucate pigs_deed")
-    mycursor.execute("CREATE TABLE If Not Exists  pigs_deed(id BIGINT AUTO_INCREMENT PRIMARY KEY,total BIGINT, time  DATETIME)")
-    count_pig_deed_sql = "insert into  pigs_deed(total,time) select count(*)  ,date_format(join_date,'%Y-%m-%d') as jdate " \
-                     "from iot_db2.animals join iot_db2.animalinfos on iot_db2.animalinfos.id = iot_db2.animals.id " \
-                     " where  iot_db2.animalinfos.health_status ='死亡' group by jdate  order by jdate"
-    try:
-        info(count_pig_deed_sql)
-        info("正在执行-历史生猪死亡数据统计....")
-        print(count_pig_deed_sql)
-        mycursor.execute(count_pig_deed_sql)
-    except:
-        error(count_pig_deed_sql)
-        error("Error: unable to fecth data:")
 
-    iot_bg_db.commit()
-
-
-def count_pigs_deed_map():
+def count_pigs_deed(tableName="PigsLiveTable"):
     ## 计数历史全量 死亡地理分布数据
-    mycursor.execute("CREATE TABLE If Not Exists  pigs_deed_geo(id BIGINT AUTO_INCREMENT PRIMARY KEY,total BIGINT,lat FLOAT,lon FLOAT,province VARCHAR(10), time  DATETIME)")
-    mycursor.execute("trucate pigs_deed_geo")
-    count_pig_deed_map_sql = "insert into pigs_deed_geo(total,lat,lon,province,time) " \
+    mycursor.execute("CREATE TABLE If Not Exists  "+tableName+"(id BIGINT AUTO_INCREMENT PRIMARY KEY,total BIGINT,lat FLOAT,lon FLOAT,province VARCHAR(10), time  TIMESTAMP)")
+    mycursor.execute("TRUNCATE "+tableName)
+    count_pig_deed_sql = "insert into "+tableName+"(total,lat,lon,province,time,company,company_id) " \
                              "SELECT  count(iot_db2.animalinfos.id) as value," \
                              "iot_db2.companies.lat  as latitude ," \
                              "iot_db2.companies.lon as longitude," \
                              "iot_db2.`companies`.`province`," \
-                             "date_format(iot_db2.animalinfos.time,'%Y-%m-%d')  " \
-                             "FROM (iot_db2.animals INNER JOIN iot_db2.companies ON iot_db2.animals.`company_id`=iot_db2.companies.id) " \
+                             "date_format(iot_db2.animalinfos.time,'%Y-%m-%d'),  " \
+                             "iot_db2.companies.name as company, "  \
+                             "iot_db2.companies.id as company_id"\
+                             " FROM (iot_db2.animals INNER JOIN iot_db2.companies ON iot_db2.animals.`company_id`=iot_db2.companies.id) " \
                              "INNER JOIN iot_db2.animalinfos ON iot_db2.animals.`animalinfo_id`=iot_db2.animalinfos.id " \
-                             "where iot_db2.animalinfos.health_status ='死亡'  group by  `province` order by value ASC"
+                             "where iot_db2.animalinfos.health_status ='死亡'  group by `province` ,iot_db2.companies.id  order by value ASC"
     try:
-        info(count_pig_deed_map_sql)
+        info(count_pig_deed_sql)
         info("正在执行-生猪死亡地理位置数据统计....")
-        print(count_pig_deed_map_sql)
-        mycursor.execute(count_pig_deed_map_sql)
+        print(count_pig_deed_sql)
+        # mycursor.execute(count_pig_deed_geo_sql)
     except Exception as e:
-        error(count_pig_deed_map_sql)
+        error(count_pig_deed_sql)
         error(str(e))
 
     iot_bg_db.commit()
 
-def create_pigs_deed_geo():
-    ## 计数历史全量 死亡地理分布数据
-    mycursor.execute("CREATE TABLE If Not Exists  pigs_deed_geo(id BIGINT AUTO_INCREMENT PRIMARY KEY,total BIGINT,lat FLOAT,lon FLOAT,province VARCHAR(10), time  DATETIME)")
-    iot_bg_db.commit()
-
-def create_pigs_deed_table():
-    mycursor.execute("CREATE TABLE If Not Exists  pigs_deed(id BIGINT AUTO_INCREMENT PRIMARY KEY,total BIGINT, time  DATETIME)")
-    iot_bg_db.commit()
-def create_pigs_live_table():
-    mycursor.execute("CREATE TABLE If Not Exists  pigs_live(id BIGINT  AUTO_INCREMENT PRIMARY KEY,total BIGINT, time  DATETIME)")
-    iot_bg_db.commit()
-def create_pig_price_table():
-    mycursor.execute("CREATE TABLE If Not Exists  pig_price(id BIGINT  AUTO_INCREMENT PRIMARY KEY,省份 VARCHAR(10), 外三元 FLOAT,内三元 FLOAT,土杂猪 FLOAT,日期 DATE ,time  DATETIME  NOT NULL DEFAULT '2019-00-00 00:00:00' ON UPDATE current_timestamp())")
-    iot_bg_db.commit()
-
-def create_database(database_name):
-    mycursor.execute("CREATE DATABASE If Not Exists "+ database_name )
-
-def create_bg_tables(database_name):
-    try:
-        create_database(database_name)
-        create_pig_price_table()
-        create_pigs_live_table()
-        create_pigs_deed_table()
-        create_pigs_deed_geo()
-        iot_bg_db.close()
-    except Exception as e:
-        error(count_pig_deed_map_sql)
-        error(str(e))
 
 if __name__ == '__main__':
     setDebug()
-
-    #更新动物活动时间
-    # update `animalinfos` set time=from_unixtime(
-    # unix_timestamp('2019-12-05')
-    # + floor(
-    #     rand() * ( unix_timestamp('2019-12-05') - unix_timestamp('2019-11-05') + 1 )
-    # )
-    # )
-
     Base.metadata.create_all(engine)
     Session = sessionmaker(bind=engine)
     session = Session()
-    test_pig_price_latest_date()
     session.commit()
     session.close()
-    # create_bg_tables(BIG_DATA_DATABASE)
 
-    # create_pigs_live_table()
+    # count_pigs_live("PigsLiveTable")
 
-    # count_pigs_deed_map()
 
 
 

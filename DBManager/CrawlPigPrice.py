@@ -62,7 +62,8 @@ class PigPrice(object):
                 外三元 = waisanyuan_price[i],
                 内三元 = neisanyuan_price[i],
                 土杂猪 = tuzhazhu_price[i],
-                日期 = datetime.datetime.strptime(date[i], '%Y-%m-%d')
+                日期 = datetime.datetime.strptime(date[i], '%Y-%m-%d'),
+                time = datetime.datetime.utcnow()
             )
             print(datetime.datetime.strptime(date[i], '%Y-%m-%d'))
             pigPrice.append(pp)
