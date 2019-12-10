@@ -63,6 +63,7 @@ class FakeMQSensors(object):
         # # self.mq_client.subscribe('emqtt',qos=0)
         # self.mq_client.loop_start()
 
+        limit = -1
         while self._serverclient.mqttClient.connected is False:
             pass
 
@@ -70,36 +71,36 @@ class FakeMQSensors(object):
         # self.schedulerEngine = SchedulerEngine(self, 'client_scheduler')
         # self.add_schedule_job()
 
-        # # add  mqtt sensors
-        # domain = 'sensor'
-        # self.sensors = self.get_device_from_db(domain)[0:5]
-        # self.do_add_mqtt_sensors(mqtt_client_id=MQTT_CLIENT_ID)
+        # add  mqtt sensors
+        domain = 'sensor'
+        self.sensors = self.get_device_from_db(domain)
+        self.do_add_mqtt_sensors(mqtt_client_id=MQTT_CLIENT_ID)
         #
         #
-        # # add mqtt switch
-        # domain = 'switch'
-        # self.switches = self.get_device_from_db(domain)[0:5]
-        # debug("self.switches={}".format(len(self.switches)))
-        # self.do_add_mqtt_switch(mqtt_client_id=MQTT_CLIENT_ID)
+        # add mqtt switch
+        domain = 'switch'
+        self.switches = self.get_device_from_db(domain)
+        debug("self.switches={}".format(len(self.switches)))
+        self.do_add_mqtt_switch(mqtt_client_id=MQTT_CLIENT_ID)
 
         # add mqtt light
         domain = 'light'
-        self.lights = self.get_device_from_db(domain)[0:5]
+        self.lights = self.get_device_from_db(domain)
         debug("self.lights={}".format(len(self.lights)))
         self.do_add_mqtt_lights(mqtt_client_id=MQTT_CLIENT_ID)
         #
-        # # add mqtt climate
-        # domain = 'climate'
-        # self.climates = self.get_device_from_db(domain)
-        # debug("self.climate={}".format(len(self.climates)))
-        # self.do_add_mqtt_climates(mqtt_client_id=MQTT_CLIENT_ID)
+        # add mqtt climate
+        domain = 'climate'
+        self.climates = self.get_device_from_db(domain)
+        debug("self.climate={}".format(len(self.climates)))
+        self.do_add_mqtt_climates(mqtt_client_id=MQTT_CLIENT_ID)
 
 
         # add mqtt climate
-        # domain = 'fan'
-        # self.fans = self.get_device_from_db(domain)
-        # debug("self.fan={}".format(len(self.fans)))
-        # self.do_add_mqtt_fans(mqtt_client_id=MQTT_CLIENT_ID)
+        domain = 'fan'
+        self.fans = self.get_device_from_db(domain)
+        debug("self.fan={}".format(len(self.fans)))
+        self.do_add_mqtt_fans(mqtt_client_id=MQTT_CLIENT_ID)
 
         TimerThread(self.do_faker_sensor_value, 180, initial_delay=5)
 
@@ -198,16 +199,16 @@ class FakeMQSensors(object):
                  "cmd_t": "~/set",
                  # "icon": "mdi:power",
                  "stat_t": "~/state",
-                 "avty_t": "~/avail",
-                 "pl_avail":"online",
-                 "pl_not_avail":"offline",
-                 "payload_on": "on",
-                 "payload_off": "of",
-                 "state_on": "on",
-                 "state_off": "off",
-                 "optimistic": False,
-                 "qos": 0,
-                 "retain": True,
+                 # "avty_t": "~/avail",
+                 # "pl_avail":"online",
+                 # "pl_not_avail":"offline",
+                 # "payload_on": "on",
+                 # "payload_off": "of",
+                 # "state_on": "on",
+                 # "state_off": "off",
+                 # "optimistic": False,
+                 # "qos": 0,
+                 # "retain": True,
                  "value_template": '{{value_json.state}}'
                 }
             # debug(switch_topic)
@@ -215,13 +216,13 @@ class FakeMQSensors(object):
             # sensor_topic,sensor_config =  self.add_mqtt_sensor_devices(sensor, mqtt_client_id)
             self._serverclient.EnqueuePacket(switch_config ,switch_topic)
 
-            avail_topic = "switch/{}/{}/avail".format(mqtt_client_id,switch.loc + "_"+ switch.device_class)
-            message={
-                "avail": "online"
-            }
-            # debug(avail_topic)
-            # debug(message)
-            self._serverclient.EnqueuePacket(message, avail_topic)
+            # avail_topic = "switch/{}/{}/avail".format(mqtt_client_id,switch.loc + "_"+ switch.device_class)
+            # message={
+            #     "avail": "online"
+            # }
+            # # debug(avail_topic)
+            # # debug(message)
+            # self._serverclient.EnqueuePacket(message, avail_topic)
 
     def do_add_mqtt_lights(self, mqtt_client_id=""):
         # {"state":"on"}
@@ -234,13 +235,13 @@ class FakeMQSensors(object):
                     "name": "{}".format(light.loc),
                     "cmd_t": "~/set",
                     "stat_t": "~/state",
-                    "avty_t": "~/avail",
-                    "pl_avail": "online",
-                    "pl_not_avail": "offline",
-                    "payload_on": "on",
-                    "payload_off": "off",
-                    "stat_val_tpl": '{{value_json.state}}',
-                    "device": {"identifiers":"identifiers", "connections":[["mac", "02:5b:26:a8:dc:12"]],"manufacturer":"manufacturer","model":"mode","name":"name","sw_version":"sw_version"}
+                    # "avty_t": "~/avail",
+                    # "pl_avail": "online",
+                    # "pl_not_avail": "offline",
+                    # "payload_on": "on",
+                    # "payload_off": "off",
+                    # "stat_val_tpl": '{{value_json.state}}',
+                     "device": {"identifiers":"identifiers", "connections":[["mac", "02:5b:26:a8:dc:12"]],"manufacturer":"manufacturer","model":"mode","name":"name","sw_version":"sw_version"}
                 }
 
             self._serverclient.EnqueuePacket(light_config ,light_topic)
@@ -286,7 +287,7 @@ class FakeMQSensors(object):
 
     def do_add_mqtt_climates(self, mqtt_client_id=""):
         _climates = self.climates
-        for climate in _climates[0:2]:
+        for climate in _climates:
             climate_topic = "climate/{}/{}/config".format(mqtt_client_id,climate.loc + "_"+ climate.device_class)
 
             # State payload
@@ -299,37 +300,38 @@ class FakeMQSensors(object):
                 {
                     "~": "homeassistant/climate/{}/{}".format(mqtt_client_id,climate.loc),
                     "name": "{}".format(climate.loc),
+                    "initial": 20,
                     "mode_cmd_t": "~/set",
-                    "mode_stat_t": "~/mode_state",
-                    "mode_stat_tpl": "{{value_json.mode}}",
-                    "avty_t": "~/avail",
-                    "value_template": "{{value_json}}",
-                    "pl_avail": "online",
-                    "payload_on": "on",
-                    "payload_off": "off",
-                    "pl_not_avail": "offline",
+                    # "mode_stat_t": "~/mode_state",
+                    # "mode_stat_tpl": "{{value_json.mode}}",
+                    # "avty_t": "~/avail",
+                    # "value_template": "{{value_json}}",
+                    # "pl_avail": "online",
+                    # "payload_on": "on",
+                    # "payload_off": "off",
+                    # "pl_not_avail": "offline",
                     "temp_cmd_t": "~/targetTempCmd",
-                    "temp_stat_t":"~/state",
-                    "temp_stat_tpl": "{{value_json.temperature_state}}",
-                    "temperature_low_command_topic": "~/temperature_low/set",
-                    "temperature_low_state_topic": "~/temperature_low/state",
-                    # "temperature_low_state_template": "{{value_json.temperature_low_state}}",
-                    "temperature_high_command_topic": "~/temperature_high/set",
-                    "temperature_high_state_topic": "~/temperature_high/state",
-                    # "temperature_high_state_template": "{{alue_json.temperature_high_state}}",
+                    # "temp_stat_t":"~/state",
+                    # "temp_stat_tpl": "{{value_json.temperature_state}}",
+                    # "temperature_low_command_topic": "~/temperature_low/set",
+                    # "temperature_low_state_topic": "~/temperature_low/state",
+                    # # "temperature_low_state_template": "{{value_json.temperature_low_state}}",
+                    # "temperature_high_command_topic": "~/temperature_high/set",
+                    # "temperature_high_state_topic": "~/temperature_high/state",
+                    # # "temperature_high_state_template": "{{alue_json.temperature_high_state}}",
                     "fan_mode_cmd_t": "~/fan/set",
-                    "fan_mode_stat_t": "~/fan/state",
-                    "fan_mode_stat_tpl": "{{value_json.fan_mode}}",
-                    "curr_temp_t": "~/current_temperature",
-                    "curr_temp_tpl": "{{value_json.current_temperature}}",
+                    # "fan_mode_stat_t": "~/fan/state",
+                    # "fan_mode_stat_tpl": "{{value_json.fan_mode}}",
+                    # "curr_temp_t": "~/current_temperature",
+                    # "curr_temp_tpl": "{{value_json.current_temperature}}",
                     "pow_cmd_t": "~/power/set",
-                    "action_topic": "~/action",
-                    "action_template" : "{{value_json.action}}",
+                    # "action_topic": "~/action",
+                    # "action_template" : "{{value_json.action}}",
                     "min_temp": "15",
                     "max_temp": "25",
                     "temp_step": "0.5",
                     "modes": ["off","cool","fan_only" ,'auto',"dry","heat"],
-                    "device": {"identifiers":"identifiers", "connections":[["mac", "02:5b:26:a8:dc:12"]],"manufacturer":"manufacturer","model":"mode","name":"name","sw_version":"sw_version"}
+                    # "device": {"identifiers":"identifiers", "connections":[["mac", "02:5b:26:a8:dc:12"]],"manufacturer":"manufacturer","model":"mode","name":"name","sw_version":"sw_version"}
                 }
 
 

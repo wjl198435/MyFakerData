@@ -54,3 +54,62 @@ count(animals.id)
 from animals 
 join animalinfos on `animals`.`animalinfo_id`= animalinfos.id 
 where company_id=${company_id} and health_status <> '死亡' and $__timeFilter(animalinfos.time)
+
+
+
+## ui-lovelace.yaml
+    ```
+          - cards:
+              - aspect_ratio: 60%
+                columns: 3
+                entity: climate.house1_room1
+                name: room1
+                theme: 明亮蓝
+                type: thermostat
+              - entities:
+                  - entity: sensor.house1_room1_temperature
+                    name: 温度
+                  - entity: sensor.house1_room1_humidity
+                    name: 湿度
+                  - entity: sensor.house1_room1_pm25
+                    name: PM2.5
+                  - entity: sensor.house1_room1_illuminance
+                    name: 亮度
+                  - entity: sensor.house1_room1_nh3
+                    name: 氨气
+                theme: 黑-蓝
+                type: glance
+            type: vertical-stack
+
+    ```
+    
+    
+    ```
+    - entities:
+      - entity: sensor.house1_room2_humidity
+        name: 温度
+      - entity: sensor.house1_room2_illuminance
+        name: 亮度
+      - entity: sensor.house1_room2_nh3
+        name: 氨气
+      - entity: sensor.house1_room2_temperature
+        name: 温度
+      - entity: sensor.house1_room2_pm25
+        name: pm2.5
+      - entity: climate.house1_room1
+        name: 空调
+      - entity: fan.house1_room1
+        name: 风扇
+      - entity: light.house1_room1
+        name: 灯光
+      - entity: switch.house1_room1_cool    
+        name: 制冷开关
+      - entity: switch.house1_room1_heater 
+        name: 加热开关   
+      - entity: switch.house1_room1_switch
+        name: 开关 
+      - show_header_toggle: false
+    theme: 灰-绿
+    title: room1
+    type: entities
+    ```
