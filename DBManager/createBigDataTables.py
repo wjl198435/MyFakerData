@@ -49,8 +49,8 @@ class PigPriceTable(Base):
         return '%s(%r) %s' % (self.__class__.__name__, self.日期,self.省份)
 
 def pigPriceIsExist(day):
-    sql = session.query(PigPriceTable).filter_by(日期 = str(day))
-    debug(sql)
+    sql = session.query(PigPriceTable).filter_by(日期 = str(day)).limit(1)
+    # debug(sql)
     result = sql.first()
     if result is None:
         return False

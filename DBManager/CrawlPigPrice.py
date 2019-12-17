@@ -13,7 +13,7 @@ from bs4 import BeautifulSoup
 import sys
 sys.path.append("..")
 
-from utils.logger import info, setInfo,error,debug,setDebug
+from utils.logger import info, setInfo,error,debug,setDebug,warn
 # import sys
 # sys.path.append("../..")
 
@@ -27,7 +27,7 @@ class PigPrice(object):
 
     def __init__(self,url=PIG_PRICE_URL):
         """Initialize processor thread"""
-        debug('ProcessorThread init')
+        # debug('ProcessorThread init')
         self._url = url
 
     def getPigPrice(self):
@@ -38,15 +38,16 @@ class PigPrice(object):
 
         self.parseTableHeader(tables[1])
         datas = self.parseTableContent(tables[1])
-        day = datas[4]
+        day = datas[4][0]
+        # info("getPigPrice")
         # debug("getPigPrice :{}".format(day))
 
-        today = datetime.date.today()
-        if pigPriceIsExist(today):
-           info("Today  {} pig price is exist".format(today))
+        # today = datetime.date.today()
+        if pigPriceIsExist(day):
+           warn("Today  {} pig price is exist,will omit it!!".format(day))
             # self.writeToDB(datas)
         else:
-            info("Today {} pig price is not exist , will insert to table".format(today))
+            info("Today {} pig price is not exist , will insert to table".format(day))
             self.writeToDB(datas)
 
 
@@ -56,7 +57,7 @@ class PigPrice(object):
         # print(province)
         # print(waisanyuan_price)
         for i in range(0, len(province)):
-            print(i, province[i])
+            # print(i, province[i])
             pp = PigPriceTable(
                 省份 = province[i],
                 外三元 = waisanyuan_price[i],
@@ -65,7 +66,7 @@ class PigPrice(object):
                 日期 = datetime.datetime.strptime(date[i], '%Y-%m-%d'),
                 time = datetime.datetime.utcnow()
             )
-            print(datetime.datetime.strptime(date[i], '%Y-%m-%d'))
+            # print(datetime.datetime.strptime(date[i], '%Y-%m-%d'))
             pigPrice.append(pp)
         dbm =  DBManager(getBigDataBaseSession())
         dbm.InsertAll(pigPrice)
@@ -92,7 +93,7 @@ class PigPrice(object):
             h2 = header[2].text.split()[0]
             h3 = header[3].text.split()[0]
             h4 = header[4].text.split()[0]
-            print(h0,h1,h2,h3,h4)
+            # print(h0,h1,h2,h3,h4)
 
     def parseTableContent(self,table):
         tab = table

@@ -28,7 +28,7 @@ class SchedulerManager(object):
 
     def make_test_seconds_event(self):
         now = datetime.datetime.strftime(datetime.datetime.utcnow(), '%Y-%m-%dT%H:%M:%S.%fZ')
-        event = {'id':'testSeconds', 'title':'test_seconds', 'actions':['self.get_events_task'], 'config':{'type':'interval','unit':'second', 'interval':60,'start_date':now}}
+        event = {'id':'jobs_report', 'title':'jobs_report', 'actions':['self.get_events_task'], 'config':{'type':'interval','unit':'minute', 'interval':5,'start_date':now}}
         return event
 
 
@@ -74,5 +74,5 @@ class SchedulerManager(object):
         next_time = datetime.datetime.strptime(str(next_year)+"-"+str(next_month)+"-"+str(next_day)+" 00:00:00", "%Y-%m-%d %H:%M:%S")
         start_time  =  datetime.datetime.strftime(next_time,'%Y-%m-%dT%H:%M:%S.%fZ')
 
-        pig_price_event = {'id':'getPigPrice', 'title':'pig_price_task', 'actions':['self.pig_price_task'], 'config':{'type':'interval','unit':'day', 'interval':1,'start_date':start_time}}
+        pig_price_event = {'id':'getPigPrice', 'title':'pig_price_task', 'actions':['self.pig_price_task'], 'config':{'type':'interval','unit':'hour', 'interval':1,'start_date':start_time}}
         return pig_price_event
