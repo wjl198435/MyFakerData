@@ -1,6 +1,6 @@
 __version__ = '2.0.3'
 
-MQTT_BROKER = "192.168.8.102"
+MQTT_BROKER = "192.168.8.107"
 # MQTT_BROKER = "172.29.46.236"
 MQTT_PORT = 1883
 MQTT_CLIENT_ID = "qiangshen"
@@ -18,7 +18,7 @@ DB_USER = 'grafana'
 DB_PSD = 'grafana'
 # DB_HOST = '172.29.46.236'
 # DB_HOST = '192.168.8.102'
-DB_HOST = "localhost"
+DB_HOST = "192.168.8.107"
 DB_DATABASE =  "grafana"
 DB_CHARSET = "utf8"
 
