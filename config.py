@@ -14,18 +14,18 @@ MQTT_DIS_PREFIX = "homeassistant"
 ApiHost = MQTT_BROKER
 
 
-DB_USER = 'hass'
-DB_PSD = 'hass'
+DB_USER = 'grafana'
+DB_PSD = 'grafana'
 # DB_HOST = '172.29.46.236'
 # DB_HOST = '192.168.8.102'
-DB_HOST = "192.168.8.102"
-DB_DATABASE =  "iot_db2"
+DB_HOST = "localhost"
+DB_DATABASE =  "grafana"
 DB_CHARSET = "utf8"
 
-BIG_DATA_USER = 'hass'
-BIG_DATA_PSD = 'hass'
+BIG_DATA_USER = 'grafana'
+BIG_DATA_PSD = 'grafana'
 BIG_DATA_HOST = DB_HOST
-BIG_DATA_DATABASE = 'BigData_DB'
+BIG_DATA_DATABASE = 'grafana'
 BIG_DATA_CHARSET = 'utf8'
 
 DB_URL = 'mysql+pymysql://'+DB_USER+':'+DB_PSD+'@'+DB_HOST+'/'+DB_DATABASE+'?charset='+DB_CHARSET
