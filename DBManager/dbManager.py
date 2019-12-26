@@ -12,7 +12,9 @@ class DBManager(object):
     def InsertOne(self,data):
         self._session.add(data)
         self._session.commit()
+        self._session.close()
 
     def InsertAll(self,datas):
         self._session.add_all(datas)
         self._session.commit()
+        self._session.close()

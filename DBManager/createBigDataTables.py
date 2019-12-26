@@ -88,8 +88,8 @@ class PigsDeedTable(Base):
     company_id = Column(Integer)
 
 def getBigDataBaseSession():
-    Session = sessionmaker(bind=engine)
-    session = Session()
+    # Session = sessionmaker(bind=engine)
+    # session = Session()
     return session
 
 #####################################################################
