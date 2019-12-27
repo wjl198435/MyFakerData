@@ -16,9 +16,9 @@ from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, sessionmaker
 from sqlalchemy import Column, String, Integer, ForeignKey, Table, DateTime, FLOAT, Text,Time,Date,TIMESTAMP
-
+from sqlalchemy.pool import NullPool
 Base = declarative_base()
-engine = create_engine(BD_DATA_URL)
+engine = create_engine(BD_DATA_URL,poolclass=NullPool)
 
 Session = sessionmaker(bind=engine)
 session = Session()
@@ -88,9 +88,16 @@ class PigsDeedTable(Base):
     company_id = Column(Integer)
 
 def getBigDataBaseSession():
-    # Session = sessionmaker(bind=engine)
-    # session = Session()
-    return session
+    _Session = sessionmaker(bind=engine)
+    _session = _Session()
+    return _session
+    # if session:
+    #     return session
+    # else :
+    #     Session = sessionmaker(bind=engine)
+    #     session = Session()
+    #     return session
+
 
 #####################################################################
 #### sql

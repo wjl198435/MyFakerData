@@ -69,6 +69,7 @@ class PigPrice(object):
             # print(datetime.datetime.strptime(date[i], '%Y-%m-%d'))
             pigPrice.append(pp)
         dbm =  DBManager(getBigDataBaseSession())
+
         dbm.InsertAll(pigPrice)
 
     def getHtml(self,url):
